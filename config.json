@@ -1,0 +1,181 @@
+{
+  "schema_version": "3.0",
+  "gate": {
+    "threshold": 45,
+    "weights": {
+      "unattributed": 0.25,
+      "review_depth": 0.25,
+      "untested": 0.25,
+      "blast_radius": 0.25
+    },
+    "not_computable_score": 80,
+    "degraded_floor": 40,
+    "unmatched_policy": "penalize",
+    "human_declared_label": "docket:human-authored",
+    "hard_stops": [
+      {
+        "id": "HS1",
+        "type": "signal_at_or_above",
+        "signal": "*",
+        "value": 90
+      },
+      {
+        "id": "HS2",
+        "type": "non_code_without_previous_manifest"
+      },
+      {
+        "id": "HS3",
+        "type": "unmatched_and_sensitive_path"
+      }
+    ],
+    "risk_bands": {
+      "low": 25,
+      "medium": 50,
+      "high": 75
+    }
+  },
+  "signals": {
+    "review_depth": {
+      "seconds_per_line": 2.0,
+      "speed_weight": 0.7,
+      "engagement_weight": 0.3,
+      "stale_penalty": 25
+    },
+    "unattributed": {
+      "always_in_scope": [
+        "tests/**",
+        "test/**",
+        "**/*.md"
+      ]
+    },
+    "untested": {
+      "code_globs": [
+        "**/*.py"
+      ],
+      "test_globs": [
+        "tests/**",
+        "test/**",
+        "**/test_*.py",
+        "**/*_test.py"
+      ]
+    },
+    "blast_radius": {
+      "points": {
+        "sensitive_tool": 40,
+        "sensitive_path": 25,
+        "sensitive_path_cap": 50,
+        "sensitive_bash": 20,
+        "sensitive_bash_cap": 40,
+        "bypass_mode": 20,
+        "sandbox_disabled": 10,
+        "mostly_auto_approved": 10
+      },
+      "auto_approved_ratio": 0.9,
+      "auto_approved_min_calls": 10,
+      "non_code_base": {
+        "model_version": 90,
+        "prompt": 70,
+        "permission": 60,
+        "knowledge": 40
+      }
+    },
+    "rehearsal": {
+      "regression_weight": 10,
+      "changed_weight": 1
+    }
+  },
+  "sensitive": {
+    "paths": [
+      "**/auth/**",
+      "**/entitlement/**",
+      "**/migrations/**",
+      "**/*.tf",
+      ".github/workflows/**",
+      "**/payments/**"
+    ],
+    "tools": [
+      "entitlement_svc.*",
+      "*.grant",
+      "*.delete_*"
+    ],
+    "bash_patterns": [
+      "terraform apply",
+      "kubectl ",
+      "psql ",
+      "aws iam",
+      "rm -rf"
+    ]
+  },
+  "correlator": {
+    "trailer_key": "DocketSession-Id",
+    "allow_time_match": true,
+    "time_match_grace_minutes": 30,
+    "verify_min_lines": 3
+  },
+  "attributor": {
+    "mixed_similarity": 0.75,
+    "min_line_length": 4,
+    "max_fuzzy_lines_per_file": 2000
+  },
+  "github": {
+    "default_repo": "lasya365/strapi-docket-s2",
+    "status_context": "docket/gate",
+    "status_states": {
+      "HOLD": "pending",
+      "APPROVE": "success",
+      "REJECTED": "failure"
+    },
+    "coverage_artifact_name": "coverage-json"
+  },
+  "freshservice": {
+    "enabled": true,
+    "domain": "freshworks065.freshservice.com",
+    "requester_id": 30002018743,
+    "defaults": {
+      "priority": 1,
+      "impact": 1,
+      "status": 1,
+      "change_type": 2
+    },
+    "risk_codes": {
+      "low": 1,
+      "medium": 2,
+      "high": 3,
+      "very_high": 4
+    },
+    "planned_start_offset_hours": 24,
+    "planned_window_hours": 1,
+    "custom_fields": {
+      "decision": "",
+      "score": "",
+      "seal": "",
+      "source_url": ""
+    },
+    "approval_status_map": {
+      "approved": [
+        1
+      ],
+      "rejected": [
+        2
+      ]
+    }
+  },
+  "deploy": {
+    "default_target": null,
+    "default_window": null
+  },
+  "manifest": {
+    "path": "demo/agent.manifest.json",
+    "rehearsal_dir": "demo/rehearsal",
+    "poll_seconds": 30
+  },
+  "brief": {
+    "enabled": true,
+    "model": "claude-sonnet-5",
+    "timeout_seconds": 20,
+    "prompt_excerpt_chars": 280
+  },
+  "server": {
+    "public_base_url": "http://localhost:8000"
+  }
+}

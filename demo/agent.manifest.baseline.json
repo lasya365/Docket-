@@ -1,0 +1,31 @@
+{
+  "agent_id": "resolution-agent",
+  "model": "vendor-4.1",
+  "prompt": {
+    "path": "prompts/system.md",
+    "sha256": ""
+  },
+  "tools": [
+    "kb.search",
+    "ticket.update"
+  ],
+  "permissions": [
+    "tickets:write"
+  ],
+  "knowledge": [
+    {
+      "id": "kb-2211",
+      "revision": "7"
+    },
+    {
+      "id": "kb-1180",
+      "revision": "3"
+    }
+  ],
+  "workflows": [
+    "incident-triage",
+    "entitlement-provisioning",
+    "knowledge-retrieval"
+  ],
+  "change_ref": null
+}

@@ -1,0 +1,19 @@
+# Secrets
+.env
+!.env.example
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Frontend
+node_modules/
+dist/
+
+# Local runtime data
+docket.sqlite
+docket.sqlite-*
+out/
+*.egg-info/

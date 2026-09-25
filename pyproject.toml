@@ -1,0 +1,30 @@
+[project]
+name = "docket"
+version = "3.0.0"
+description = "Docket v3 - evidence-based change governance for AI coding agents (RFC-0003)"
+requires-python = ">=3.11"
+dependencies = [
+  "fastapi",
+  "uvicorn",
+  "pydantic>=2",
+  "httpx",
+  "PyGithub",
+  "pathspec",
+  "anthropic",
+  "mcp",
+]
+
+[project.optional-dependencies]
+dev = ["pytest"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["backend/src"]
+
+[tool.pytest.ini_options]
+testpaths = ["backend/tests"]
+pythonpath = ["backend/src", "backend/tests"]
+filterwarnings = ["ignore::DeprecationWarning"]

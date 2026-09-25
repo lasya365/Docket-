@@ -1,0 +1,395 @@
+{
+  "author_login": "tkoenig",
+  "base_ref": "main",
+  "body": "Closes #131\n\nsmall AI-assisted change, in scope, reviewed for 22 minutes with comments, 95% coverage on AI lines",
+  "commits": [
+    {
+      "author_email": "tkoenig@acme.example",
+      "author_login": "tkoenig",
+      "committed_at": "2026-09-16T09:30:00Z",
+      "message": "Round invoice tax to the customer's currency (part 1)",
+      "sha": "4482a91f3c0d4e5f6a7b8c9d0e1f2a3b4c5d6e7f",
+      "trailers": {}
+    },
+    {
+      "author_email": "tkoenig@acme.example",
+      "author_login": "tkoenig",
+      "committed_at": "2026-09-16T09:50:00Z",
+      "message": "Round invoice tax to the customer's currency (part 2)\n\nDocketSession-Id: cleared-session-1",
+      "sha": "4482a91f3c1d4e5f6a7b8c9d0e1f2a3b4c5d6e7f",
+      "trailers": {
+        "DocketSession-Id": [
+          "cleared-session-1"
+        ]
+      }
+    }
+  ],
+  "created_at": "2026-09-16T09:00:00Z",
+  "files": [
+    {
+      "additions": 30,
+      "deletions": 1,
+      "hunks": [
+        {
+          "added": [
+            {
+              "line_no": 12,
+              "text": "line_billing/invoice.py_12 = compute(12)"
+            },
+            {
+              "line_no": 13,
+              "text": "line_billing/invoice.py_13 = compute(13)"
+            },
+            {
+              "line_no": 14,
+              "text": "line_billing/invoice.py_14 = compute(14)"
+            },
+            {
+              "line_no": 15,
+              "text": "line_billing/invoice.py_15 = compute(15)"
+            },
+            {
+              "line_no": 16,
+              "text": "line_billing/invoice.py_16 = compute(16)"
+            },
+            {
+              "line_no": 17,
+              "text": "line_billing/invoice.py_17 = compute(17)"
+            },
+            {
+              "line_no": 18,
+              "text": "line_billing/invoice.py_18 = compute(18)"
+            },
+            {
+              "line_no": 19,
+              "text": "line_billing/invoice.py_19 = compute(19)"
+            },
+            {
+              "line_no": 20,
+              "text": "line_billing/invoice.py_20 = compute(20)"
+            },
+            {
+              "line_no": 21,
+              "text": "line_billing/invoice.py_21 = compute(21)"
+            },
+            {
+              "line_no": 22,
+              "text": "line_billing/invoice.py_22 = compute(22)"
+            },
+            {
+              "line_no": 23,
+              "text": "line_billing/invoice.py_23 = compute(23)"
+            },
+            {
+              "line_no": 24,
+              "text": "line_billing/invoice.py_24 = compute(24)"
+            },
+            {
+              "line_no": 25,
+              "text": "line_billing/invoice.py_25 = compute(25)"
+            },
+            {
+              "line_no": 26,
+              "text": "line_billing/invoice.py_26 = compute(26)"
+            },
+            {
+              "line_no": 27,
+              "text": "line_billing/invoice.py_27 = compute(27)"
+            },
+            {
+              "line_no": 28,
+              "text": "line_billing/invoice.py_28 = compute(28)"
+            },
+            {
+              "line_no": 29,
+              "text": "line_billing/invoice.py_29 = compute(29)"
+            },
+            {
+              "line_no": 30,
+              "text": "line_billing/invoice.py_30 = compute(30)"
+            },
+            {
+              "line_no": 31,
+              "text": "line_billing/invoice.py_31 = compute(31)"
+            },
+            {
+              "line_no": 32,
+              "text": "line_billing/invoice.py_32 = compute(32)"
+            },
+            {
+              "line_no": 33,
+              "text": "line_billing/invoice.py_33 = compute(33)"
+            },
+            {
+              "line_no": 34,
+              "text": "line_billing/invoice.py_34 = compute(34)"
+            },
+            {
+              "line_no": 35,
+              "text": "line_billing/invoice.py_35 = compute(35)"
+            },
+            {
+              "line_no": 36,
+              "text": "line_billing/invoice.py_36 = compute(36)"
+            },
+            {
+              "line_no": 37,
+              "text": "line_billing/invoice.py_37 = compute(37)"
+            },
+            {
+              "line_no": 38,
+              "text": "assert guard_38(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 39,
+              "text": "assert guard_39(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 40,
+              "text": "assert guard_40(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 41,
+              "text": "assert guard_41(ctx) is not None  # hand-written"
+            }
+          ],
+          "hunk_id": "billing/invoice.py#0",
+          "new_lines": 33,
+          "new_start": 12,
+          "old_lines": 3,
+          "old_start": 9,
+          "path": "billing/invoice.py",
+          "removed_count": 1
+        }
+      ],
+      "patch_present": true,
+      "path": "billing/invoice.py",
+      "status": "modified"
+    },
+    {
+      "additions": 20,
+      "deletions": 1,
+      "hunks": [
+        {
+          "added": [
+            {
+              "line_no": 12,
+              "text": "line_billing/tax.py_12 = compute(12)"
+            },
+            {
+              "line_no": 13,
+              "text": "line_billing/tax.py_13 = compute(13)"
+            },
+            {
+              "line_no": 14,
+              "text": "line_billing/tax.py_14 = compute(14)"
+            },
+            {
+              "line_no": 15,
+              "text": "line_billing/tax.py_15 = compute(15)"
+            },
+            {
+              "line_no": 16,
+              "text": "line_billing/tax.py_16 = compute(16)"
+            },
+            {
+              "line_no": 17,
+              "text": "line_billing/tax.py_17 = compute(17)"
+            },
+            {
+              "line_no": 18,
+              "text": "line_billing/tax.py_18 = compute(18)"
+            },
+            {
+              "line_no": 19,
+              "text": "line_billing/tax.py_19 = compute(19)"
+            },
+            {
+              "line_no": 20,
+              "text": "line_billing/tax.py_20 = compute(20)"
+            },
+            {
+              "line_no": 21,
+              "text": "line_billing/tax.py_21 = compute(21)"
+            },
+            {
+              "line_no": 22,
+              "text": "line_billing/tax.py_22 = compute(22)"
+            },
+            {
+              "line_no": 23,
+              "text": "line_billing/tax.py_23 = compute(23)"
+            },
+            {
+              "line_no": 24,
+              "text": "line_billing/tax.py_24 = compute(24)"
+            },
+            {
+              "line_no": 25,
+              "text": "line_billing/tax.py_25 = compute(25)"
+            },
+            {
+              "line_no": 26,
+              "text": "line_billing/tax.py_26 = compute(26)"
+            },
+            {
+              "line_no": 27,
+              "text": "line_billing/tax.py_27 = compute(27)"
+            },
+            {
+              "line_no": 28,
+              "text": "assert guard_28(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 29,
+              "text": "assert guard_29(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 30,
+              "text": "assert guard_30(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 31,
+              "text": "assert guard_31(ctx) is not None  # hand-written"
+            }
+          ],
+          "hunk_id": "billing/tax.py#0",
+          "new_lines": 23,
+          "new_start": 12,
+          "old_lines": 3,
+          "old_start": 9,
+          "path": "billing/tax.py",
+          "removed_count": 1
+        }
+      ],
+      "patch_present": true,
+      "path": "billing/tax.py",
+      "status": "modified"
+    },
+    {
+      "additions": 14,
+      "deletions": 1,
+      "hunks": [
+        {
+          "added": [
+            {
+              "line_no": 12,
+              "text": "line_billing/report.py_12 = compute(12)"
+            },
+            {
+              "line_no": 13,
+              "text": "line_billing/report.py_13 = compute(13)"
+            },
+            {
+              "line_no": 14,
+              "text": "line_billing/report.py_14 = compute(14)"
+            },
+            {
+              "line_no": 15,
+              "text": "line_billing/report.py_15 = compute(15)"
+            },
+            {
+              "line_no": 16,
+              "text": "line_billing/report.py_16 = compute(16)"
+            },
+            {
+              "line_no": 17,
+              "text": "line_billing/report.py_17 = compute(17)"
+            },
+            {
+              "line_no": 18,
+              "text": "line_billing/report.py_18 = compute(18)"
+            },
+            {
+              "line_no": 19,
+              "text": "line_billing/report.py_19 = compute(19)"
+            },
+            {
+              "line_no": 20,
+              "text": "assert guard_20(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 21,
+              "text": "assert guard_21(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 22,
+              "text": "assert guard_22(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 23,
+              "text": "assert guard_23(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 24,
+              "text": "assert guard_24(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 25,
+              "text": "assert guard_25(ctx) is not None  # hand-written"
+            }
+          ],
+          "hunk_id": "billing/report.py#0",
+          "new_lines": 17,
+          "new_start": 12,
+          "old_lines": 3,
+          "old_start": 9,
+          "path": "billing/report.py",
+          "removed_count": 1
+        }
+      ],
+      "patch_present": true,
+      "path": "billing/report.py",
+      "status": "modified"
+    }
+  ],
+  "head_ref": "feature/cleared",
+  "head_sha": "4482a91f3c1d4e5f6a7b8c9d0e1f2a3b4c5d6e7f",
+  "labels": [],
+  "linked_issue": {
+    "body": "Invoice tax rounds to two decimals in every currency.\n\nRetries must not drop an entitlement that was already granted.\nScope: billing/**\n",
+    "number": 131,
+    "scope_paths": [
+      "billing/**"
+    ],
+    "title": "Invoice tax rounds to two decimals in every currency",
+    "url": "https://github.com/acme/provisioning-service/issues/131"
+  },
+  "merged": false,
+  "pr_number": 4482,
+  "provenance": "real",
+  "repo": "acme/provisioning-service",
+  "review_comments": [
+    {
+      "created_at": "2026-09-16T09:55:30Z",
+      "path": "billing/invoice.py",
+      "reviewer": "rdolan"
+    },
+    {
+      "created_at": "2026-09-16T09:55:40Z",
+      "path": "billing/invoice.py",
+      "reviewer": "rdolan"
+    },
+    {
+      "created_at": "2026-09-16T09:55:50Z",
+      "path": "billing/tax.py",
+      "reviewer": "rdolan"
+    }
+  ],
+  "review_requests": [
+    {
+      "requested_at": "2026-09-16T09:55:00Z",
+      "reviewer": "rdolan"
+    }
+  ],
+  "reviews": [
+    {
+      "commit_id": "4482a91f3c1d4e5f6a7b8c9d0e1f2a3b4c5d6e7f",
+      "reviewer": "rdolan",
+      "state": "APPROVED",
+      "submitted_at": "2026-09-16T10:17:00Z"
+    }
+  ],
+  "title": "Round invoice tax to the customer's currency",
+  "url": "https://github.com/acme/provisioning-service/pull/4482"
+}

@@ -1,0 +1,3619 @@
+{
+  "author_login": "tkoenig",
+  "base_ref": "main",
+  "body": "Closes #114\n\nAI wrote 604 of 812 lines, 340 of them outside the ticket's scope, approved in under two minutes, 31% coverage on AI lines, the agent called entitlement_svc.grant",
+  "commits": [
+    {
+      "author_email": "tkoenig@acme.example",
+      "author_login": "tkoenig",
+      "committed_at": "2026-09-16T09:30:00Z",
+      "message": "Rework provisioning sync and entitlement grants (part 1)",
+      "sha": "4471a91f3c0d4e5f6a7b8c9d0e1f2a3b4c5d6e7f",
+      "trailers": {}
+    },
+    {
+      "author_email": "tkoenig@acme.example",
+      "author_login": "tkoenig",
+      "committed_at": "2026-09-16T09:50:00Z",
+      "message": "Rework provisioning sync and entitlement grants (part 2)\n\nDocketSession-Id: held-session-1",
+      "sha": "4471a91f3c1d4e5f6a7b8c9d0e1f2a3b4c5d6e7f",
+      "trailers": {
+        "DocketSession-Id": [
+          "held-session-1"
+        ]
+      }
+    }
+  ],
+  "created_at": "2026-09-16T09:00:00Z",
+  "files": [
+    {
+      "additions": 250,
+      "deletions": 1,
+      "hunks": [
+        {
+          "added": [
+            {
+              "line_no": 12,
+              "text": "line_provisioning/sync.py_12 = compute(12)"
+            },
+            {
+              "line_no": 13,
+              "text": "line_provisioning/sync.py_13 = compute(13)"
+            },
+            {
+              "line_no": 14,
+              "text": "line_provisioning/sync.py_14 = compute(14)"
+            },
+            {
+              "line_no": 15,
+              "text": "line_provisioning/sync.py_15 = compute(15)"
+            },
+            {
+              "line_no": 16,
+              "text": "line_provisioning/sync.py_16 = compute(16)"
+            },
+            {
+              "line_no": 17,
+              "text": "line_provisioning/sync.py_17 = compute(17)"
+            },
+            {
+              "line_no": 18,
+              "text": "line_provisioning/sync.py_18 = compute(18)"
+            },
+            {
+              "line_no": 19,
+              "text": "line_provisioning/sync.py_19 = compute(19)"
+            },
+            {
+              "line_no": 20,
+              "text": "line_provisioning/sync.py_20 = compute(20)"
+            },
+            {
+              "line_no": 21,
+              "text": "line_provisioning/sync.py_21 = compute(21)"
+            },
+            {
+              "line_no": 22,
+              "text": "line_provisioning/sync.py_22 = compute(22)"
+            },
+            {
+              "line_no": 23,
+              "text": "line_provisioning/sync.py_23 = compute(23)"
+            },
+            {
+              "line_no": 24,
+              "text": "line_provisioning/sync.py_24 = compute(24)"
+            },
+            {
+              "line_no": 25,
+              "text": "line_provisioning/sync.py_25 = compute(25)"
+            },
+            {
+              "line_no": 26,
+              "text": "line_provisioning/sync.py_26 = compute(26)"
+            },
+            {
+              "line_no": 27,
+              "text": "line_provisioning/sync.py_27 = compute(27)"
+            },
+            {
+              "line_no": 28,
+              "text": "line_provisioning/sync.py_28 = compute(28)"
+            },
+            {
+              "line_no": 29,
+              "text": "line_provisioning/sync.py_29 = compute(29)"
+            },
+            {
+              "line_no": 30,
+              "text": "line_provisioning/sync.py_30 = compute(30)"
+            },
+            {
+              "line_no": 31,
+              "text": "line_provisioning/sync.py_31 = compute(31)"
+            },
+            {
+              "line_no": 32,
+              "text": "line_provisioning/sync.py_32 = compute(32)"
+            },
+            {
+              "line_no": 33,
+              "text": "line_provisioning/sync.py_33 = compute(33)"
+            },
+            {
+              "line_no": 34,
+              "text": "line_provisioning/sync.py_34 = compute(34)"
+            },
+            {
+              "line_no": 35,
+              "text": "line_provisioning/sync.py_35 = compute(35)"
+            },
+            {
+              "line_no": 36,
+              "text": "line_provisioning/sync.py_36 = compute(36)"
+            },
+            {
+              "line_no": 37,
+              "text": "line_provisioning/sync.py_37 = compute(37)"
+            },
+            {
+              "line_no": 38,
+              "text": "line_provisioning/sync.py_38 = compute(38)"
+            },
+            {
+              "line_no": 39,
+              "text": "line_provisioning/sync.py_39 = compute(39)"
+            },
+            {
+              "line_no": 40,
+              "text": "line_provisioning/sync.py_40 = compute(40)"
+            },
+            {
+              "line_no": 41,
+              "text": "line_provisioning/sync.py_41 = compute(41)"
+            },
+            {
+              "line_no": 42,
+              "text": "line_provisioning/sync.py_42 = compute(42)"
+            },
+            {
+              "line_no": 43,
+              "text": "line_provisioning/sync.py_43 = compute(43)"
+            },
+            {
+              "line_no": 44,
+              "text": "line_provisioning/sync.py_44 = compute(44)"
+            },
+            {
+              "line_no": 45,
+              "text": "line_provisioning/sync.py_45 = compute(45)"
+            },
+            {
+              "line_no": 46,
+              "text": "line_provisioning/sync.py_46 = compute(46)"
+            },
+            {
+              "line_no": 47,
+              "text": "line_provisioning/sync.py_47 = compute(47)"
+            },
+            {
+              "line_no": 48,
+              "text": "line_provisioning/sync.py_48 = compute(48)"
+            },
+            {
+              "line_no": 49,
+              "text": "line_provisioning/sync.py_49 = compute(49)"
+            },
+            {
+              "line_no": 50,
+              "text": "line_provisioning/sync.py_50 = compute(50)"
+            },
+            {
+              "line_no": 51,
+              "text": "line_provisioning/sync.py_51 = compute(51)"
+            }
+          ],
+          "hunk_id": "provisioning/sync.py#0",
+          "new_lines": 43,
+          "new_start": 12,
+          "old_lines": 3,
+          "old_start": 9,
+          "path": "provisioning/sync.py",
+          "removed_count": 1
+        },
+        {
+          "added": [
+            {
+              "line_no": 59,
+              "text": "line_provisioning/sync.py_59 = compute(59)"
+            },
+            {
+              "line_no": 60,
+              "text": "line_provisioning/sync.py_60 = compute(60)"
+            },
+            {
+              "line_no": 61,
+              "text": "line_provisioning/sync.py_61 = compute(61)"
+            },
+            {
+              "line_no": 62,
+              "text": "line_provisioning/sync.py_62 = compute(62)"
+            },
+            {
+              "line_no": 63,
+              "text": "line_provisioning/sync.py_63 = compute(63)"
+            },
+            {
+              "line_no": 64,
+              "text": "line_provisioning/sync.py_64 = compute(64)"
+            },
+            {
+              "line_no": 65,
+              "text": "line_provisioning/sync.py_65 = compute(65)"
+            },
+            {
+              "line_no": 66,
+              "text": "line_provisioning/sync.py_66 = compute(66)"
+            },
+            {
+              "line_no": 67,
+              "text": "line_provisioning/sync.py_67 = compute(67)"
+            },
+            {
+              "line_no": 68,
+              "text": "line_provisioning/sync.py_68 = compute(68)"
+            },
+            {
+              "line_no": 69,
+              "text": "line_provisioning/sync.py_69 = compute(69)"
+            },
+            {
+              "line_no": 70,
+              "text": "line_provisioning/sync.py_70 = compute(70)"
+            },
+            {
+              "line_no": 71,
+              "text": "line_provisioning/sync.py_71 = compute(71)"
+            },
+            {
+              "line_no": 72,
+              "text": "line_provisioning/sync.py_72 = compute(72)"
+            },
+            {
+              "line_no": 73,
+              "text": "line_provisioning/sync.py_73 = compute(73)"
+            },
+            {
+              "line_no": 74,
+              "text": "line_provisioning/sync.py_74 = compute(74)"
+            },
+            {
+              "line_no": 75,
+              "text": "line_provisioning/sync.py_75 = compute(75)"
+            },
+            {
+              "line_no": 76,
+              "text": "line_provisioning/sync.py_76 = compute(76)"
+            },
+            {
+              "line_no": 77,
+              "text": "line_provisioning/sync.py_77 = compute(77)"
+            },
+            {
+              "line_no": 78,
+              "text": "line_provisioning/sync.py_78 = compute(78)"
+            },
+            {
+              "line_no": 79,
+              "text": "line_provisioning/sync.py_79 = compute(79)"
+            },
+            {
+              "line_no": 80,
+              "text": "line_provisioning/sync.py_80 = compute(80)"
+            },
+            {
+              "line_no": 81,
+              "text": "line_provisioning/sync.py_81 = compute(81)"
+            },
+            {
+              "line_no": 82,
+              "text": "line_provisioning/sync.py_82 = compute(82)"
+            },
+            {
+              "line_no": 83,
+              "text": "line_provisioning/sync.py_83 = compute(83)"
+            },
+            {
+              "line_no": 84,
+              "text": "line_provisioning/sync.py_84 = compute(84)"
+            },
+            {
+              "line_no": 85,
+              "text": "line_provisioning/sync.py_85 = compute(85)"
+            },
+            {
+              "line_no": 86,
+              "text": "line_provisioning/sync.py_86 = compute(86)"
+            },
+            {
+              "line_no": 87,
+              "text": "line_provisioning/sync.py_87 = compute(87)"
+            },
+            {
+              "line_no": 88,
+              "text": "line_provisioning/sync.py_88 = compute(88)"
+            },
+            {
+              "line_no": 89,
+              "text": "line_provisioning/sync.py_89 = compute(89)"
+            },
+            {
+              "line_no": 90,
+              "text": "line_provisioning/sync.py_90 = compute(90)"
+            },
+            {
+              "line_no": 91,
+              "text": "line_provisioning/sync.py_91 = compute(91)"
+            },
+            {
+              "line_no": 92,
+              "text": "line_provisioning/sync.py_92 = compute(92)"
+            },
+            {
+              "line_no": 93,
+              "text": "line_provisioning/sync.py_93 = compute(93)"
+            },
+            {
+              "line_no": 94,
+              "text": "line_provisioning/sync.py_94 = compute(94)"
+            },
+            {
+              "line_no": 95,
+              "text": "line_provisioning/sync.py_95 = compute(95)"
+            },
+            {
+              "line_no": 96,
+              "text": "line_provisioning/sync.py_96 = compute(96)"
+            },
+            {
+              "line_no": 97,
+              "text": "line_provisioning/sync.py_97 = compute(97)"
+            },
+            {
+              "line_no": 98,
+              "text": "line_provisioning/sync.py_98 = compute(98)"
+            }
+          ],
+          "hunk_id": "provisioning/sync.py#1",
+          "new_lines": 43,
+          "new_start": 59,
+          "old_lines": 3,
+          "old_start": 56,
+          "path": "provisioning/sync.py",
+          "removed_count": 0
+        },
+        {
+          "added": [
+            {
+              "line_no": 106,
+              "text": "line_provisioning/sync.py_106 = compute(106)"
+            },
+            {
+              "line_no": 107,
+              "text": "line_provisioning/sync.py_107 = compute(107)"
+            },
+            {
+              "line_no": 108,
+              "text": "line_provisioning/sync.py_108 = compute(108)"
+            },
+            {
+              "line_no": 109,
+              "text": "line_provisioning/sync.py_109 = compute(109)"
+            },
+            {
+              "line_no": 110,
+              "text": "line_provisioning/sync.py_110 = compute(110)"
+            },
+            {
+              "line_no": 111,
+              "text": "line_provisioning/sync.py_111 = compute(111)"
+            },
+            {
+              "line_no": 112,
+              "text": "line_provisioning/sync.py_112 = compute(112)"
+            },
+            {
+              "line_no": 113,
+              "text": "line_provisioning/sync.py_113 = compute(113)"
+            },
+            {
+              "line_no": 114,
+              "text": "line_provisioning/sync.py_114 = compute(114)"
+            },
+            {
+              "line_no": 115,
+              "text": "line_provisioning/sync.py_115 = compute(115)"
+            },
+            {
+              "line_no": 116,
+              "text": "line_provisioning/sync.py_116 = compute(116)"
+            },
+            {
+              "line_no": 117,
+              "text": "line_provisioning/sync.py_117 = compute(117)"
+            },
+            {
+              "line_no": 118,
+              "text": "line_provisioning/sync.py_118 = compute(118)"
+            },
+            {
+              "line_no": 119,
+              "text": "line_provisioning/sync.py_119 = compute(119)"
+            },
+            {
+              "line_no": 120,
+              "text": "line_provisioning/sync.py_120 = compute(120)"
+            },
+            {
+              "line_no": 121,
+              "text": "line_provisioning/sync.py_121 = compute(121)"
+            },
+            {
+              "line_no": 122,
+              "text": "line_provisioning/sync.py_122 = compute(122)"
+            },
+            {
+              "line_no": 123,
+              "text": "line_provisioning/sync.py_123 = compute(123)"
+            },
+            {
+              "line_no": 124,
+              "text": "line_provisioning/sync.py_124 = compute(124)"
+            },
+            {
+              "line_no": 125,
+              "text": "line_provisioning/sync.py_125 = compute(125)"
+            },
+            {
+              "line_no": 126,
+              "text": "line_provisioning/sync.py_126 = compute(126)"
+            },
+            {
+              "line_no": 127,
+              "text": "line_provisioning/sync.py_127 = compute(127)"
+            },
+            {
+              "line_no": 128,
+              "text": "line_provisioning/sync.py_128 = compute(128)"
+            },
+            {
+              "line_no": 129,
+              "text": "line_provisioning/sync.py_129 = compute(129)"
+            },
+            {
+              "line_no": 130,
+              "text": "line_provisioning/sync.py_130 = compute(130)"
+            },
+            {
+              "line_no": 131,
+              "text": "line_provisioning/sync.py_131 = compute(131)"
+            },
+            {
+              "line_no": 132,
+              "text": "line_provisioning/sync.py_132 = compute(132)"
+            },
+            {
+              "line_no": 133,
+              "text": "line_provisioning/sync.py_133 = compute(133)"
+            },
+            {
+              "line_no": 134,
+              "text": "line_provisioning/sync.py_134 = compute(134)"
+            },
+            {
+              "line_no": 135,
+              "text": "line_provisioning/sync.py_135 = compute(135)"
+            },
+            {
+              "line_no": 136,
+              "text": "line_provisioning/sync.py_136 = compute(136)"
+            },
+            {
+              "line_no": 137,
+              "text": "line_provisioning/sync.py_137 = compute(137)"
+            },
+            {
+              "line_no": 138,
+              "text": "line_provisioning/sync.py_138 = compute(138)"
+            },
+            {
+              "line_no": 139,
+              "text": "line_provisioning/sync.py_139 = compute(139)"
+            },
+            {
+              "line_no": 140,
+              "text": "line_provisioning/sync.py_140 = compute(140)"
+            },
+            {
+              "line_no": 141,
+              "text": "line_provisioning/sync.py_141 = compute(141)"
+            },
+            {
+              "line_no": 142,
+              "text": "line_provisioning/sync.py_142 = compute(142)"
+            },
+            {
+              "line_no": 143,
+              "text": "line_provisioning/sync.py_143 = compute(143)"
+            },
+            {
+              "line_no": 144,
+              "text": "line_provisioning/sync.py_144 = compute(144)"
+            },
+            {
+              "line_no": 145,
+              "text": "line_provisioning/sync.py_145 = compute(145)"
+            }
+          ],
+          "hunk_id": "provisioning/sync.py#2",
+          "new_lines": 43,
+          "new_start": 106,
+          "old_lines": 3,
+          "old_start": 103,
+          "path": "provisioning/sync.py",
+          "removed_count": 0
+        },
+        {
+          "added": [
+            {
+              "line_no": 153,
+              "text": "line_provisioning/sync.py_153 = compute(153)"
+            },
+            {
+              "line_no": 154,
+              "text": "line_provisioning/sync.py_154 = compute(154)"
+            },
+            {
+              "line_no": 155,
+              "text": "line_provisioning/sync.py_155 = compute(155)"
+            },
+            {
+              "line_no": 156,
+              "text": "line_provisioning/sync.py_156 = compute(156)"
+            },
+            {
+              "line_no": 157,
+              "text": "line_provisioning/sync.py_157 = compute(157)"
+            },
+            {
+              "line_no": 158,
+              "text": "line_provisioning/sync.py_158 = compute(158)"
+            },
+            {
+              "line_no": 159,
+              "text": "line_provisioning/sync.py_159 = compute(159)"
+            },
+            {
+              "line_no": 160,
+              "text": "line_provisioning/sync.py_160 = compute(160)"
+            },
+            {
+              "line_no": 161,
+              "text": "line_provisioning/sync.py_161 = compute(161)"
+            },
+            {
+              "line_no": 162,
+              "text": "line_provisioning/sync.py_162 = compute(162)"
+            },
+            {
+              "line_no": 163,
+              "text": "line_provisioning/sync.py_163 = compute(163)"
+            },
+            {
+              "line_no": 164,
+              "text": "line_provisioning/sync.py_164 = compute(164)"
+            },
+            {
+              "line_no": 165,
+              "text": "line_provisioning/sync.py_165 = compute(165)"
+            },
+            {
+              "line_no": 166,
+              "text": "line_provisioning/sync.py_166 = compute(166)"
+            },
+            {
+              "line_no": 167,
+              "text": "line_provisioning/sync.py_167 = compute(167)"
+            },
+            {
+              "line_no": 168,
+              "text": "line_provisioning/sync.py_168 = compute(168)"
+            },
+            {
+              "line_no": 169,
+              "text": "line_provisioning/sync.py_169 = compute(169)"
+            },
+            {
+              "line_no": 170,
+              "text": "line_provisioning/sync.py_170 = compute(170)"
+            },
+            {
+              "line_no": 171,
+              "text": "line_provisioning/sync.py_171 = compute(171)"
+            },
+            {
+              "line_no": 172,
+              "text": "line_provisioning/sync.py_172 = compute(172)"
+            },
+            {
+              "line_no": 173,
+              "text": "line_provisioning/sync.py_173 = compute(173)"
+            },
+            {
+              "line_no": 174,
+              "text": "line_provisioning/sync.py_174 = compute(174)"
+            },
+            {
+              "line_no": 175,
+              "text": "line_provisioning/sync.py_175 = compute(175)"
+            },
+            {
+              "line_no": 176,
+              "text": "line_provisioning/sync.py_176 = compute(176)"
+            },
+            {
+              "line_no": 177,
+              "text": "line_provisioning/sync.py_177 = compute(177)"
+            },
+            {
+              "line_no": 178,
+              "text": "line_provisioning/sync.py_178 = compute(178)"
+            },
+            {
+              "line_no": 179,
+              "text": "line_provisioning/sync.py_179 = compute(179)"
+            },
+            {
+              "line_no": 180,
+              "text": "line_provisioning/sync.py_180 = compute(180)"
+            },
+            {
+              "line_no": 181,
+              "text": "line_provisioning/sync.py_181 = compute(181)"
+            },
+            {
+              "line_no": 182,
+              "text": "line_provisioning/sync.py_182 = compute(182)"
+            },
+            {
+              "line_no": 183,
+              "text": "line_provisioning/sync.py_183 = compute(183)"
+            },
+            {
+              "line_no": 184,
+              "text": "line_provisioning/sync.py_184 = compute(184)"
+            },
+            {
+              "line_no": 185,
+              "text": "line_provisioning/sync.py_185 = compute(185)"
+            },
+            {
+              "line_no": 186,
+              "text": "line_provisioning/sync.py_186 = compute(186)"
+            },
+            {
+              "line_no": 187,
+              "text": "line_provisioning/sync.py_187 = compute(187)"
+            },
+            {
+              "line_no": 188,
+              "text": "line_provisioning/sync.py_188 = compute(188)"
+            },
+            {
+              "line_no": 189,
+              "text": "line_provisioning/sync.py_189 = compute(189)"
+            },
+            {
+              "line_no": 190,
+              "text": "line_provisioning/sync.py_190 = compute(190)"
+            },
+            {
+              "line_no": 191,
+              "text": "line_provisioning/sync.py_191 = compute(191)"
+            },
+            {
+              "line_no": 192,
+              "text": "line_provisioning/sync.py_192 = compute(192)"
+            }
+          ],
+          "hunk_id": "provisioning/sync.py#3",
+          "new_lines": 43,
+          "new_start": 153,
+          "old_lines": 3,
+          "old_start": 150,
+          "path": "provisioning/sync.py",
+          "removed_count": 0
+        },
+        {
+          "added": [
+            {
+              "line_no": 200,
+              "text": "line_provisioning/sync.py_200 = compute(200)"
+            },
+            {
+              "line_no": 201,
+              "text": "line_provisioning/sync.py_201 = compute(201)"
+            },
+            {
+              "line_no": 202,
+              "text": "line_provisioning/sync.py_202 = compute(202)"
+            },
+            {
+              "line_no": 203,
+              "text": "line_provisioning/sync.py_203 = compute(203)"
+            },
+            {
+              "line_no": 204,
+              "text": "line_provisioning/sync.py_204 = compute(204)"
+            },
+            {
+              "line_no": 205,
+              "text": "line_provisioning/sync.py_205 = compute(205)"
+            },
+            {
+              "line_no": 206,
+              "text": "line_provisioning/sync.py_206 = compute(206)"
+            },
+            {
+              "line_no": 207,
+              "text": "line_provisioning/sync.py_207 = compute(207)"
+            },
+            {
+              "line_no": 208,
+              "text": "line_provisioning/sync.py_208 = compute(208)"
+            },
+            {
+              "line_no": 209,
+              "text": "line_provisioning/sync.py_209 = compute(209)"
+            },
+            {
+              "line_no": 210,
+              "text": "line_provisioning/sync.py_210 = compute(210)"
+            },
+            {
+              "line_no": 211,
+              "text": "line_provisioning/sync.py_211 = compute(211)"
+            },
+            {
+              "line_no": 212,
+              "text": "line_provisioning/sync.py_212 = compute(212)"
+            },
+            {
+              "line_no": 213,
+              "text": "line_provisioning/sync.py_213 = compute(213)"
+            },
+            {
+              "line_no": 214,
+              "text": "line_provisioning/sync.py_214 = compute(214)"
+            },
+            {
+              "line_no": 215,
+              "text": "line_provisioning/sync.py_215 = compute(215)"
+            },
+            {
+              "line_no": 216,
+              "text": "line_provisioning/sync.py_216 = compute(216)"
+            },
+            {
+              "line_no": 217,
+              "text": "line_provisioning/sync.py_217 = compute(217)"
+            },
+            {
+              "line_no": 218,
+              "text": "line_provisioning/sync.py_218 = compute(218)"
+            },
+            {
+              "line_no": 219,
+              "text": "line_provisioning/sync.py_219 = compute(219)"
+            },
+            {
+              "line_no": 220,
+              "text": "line_provisioning/sync.py_220 = compute(220)"
+            },
+            {
+              "line_no": 221,
+              "text": "line_provisioning/sync.py_221 = compute(221)"
+            },
+            {
+              "line_no": 222,
+              "text": "line_provisioning/sync.py_222 = compute(222)"
+            },
+            {
+              "line_no": 223,
+              "text": "line_provisioning/sync.py_223 = compute(223)"
+            },
+            {
+              "line_no": 224,
+              "text": "line_provisioning/sync.py_224 = compute(224)"
+            },
+            {
+              "line_no": 225,
+              "text": "line_provisioning/sync.py_225 = compute(225)"
+            },
+            {
+              "line_no": 226,
+              "text": "line_provisioning/sync.py_226 = compute(226)"
+            },
+            {
+              "line_no": 227,
+              "text": "line_provisioning/sync.py_227 = compute(227)"
+            },
+            {
+              "line_no": 228,
+              "text": "line_provisioning/sync.py_228 = compute(228)"
+            },
+            {
+              "line_no": 229,
+              "text": "line_provisioning/sync.py_229 = compute(229)"
+            },
+            {
+              "line_no": 230,
+              "text": "line_provisioning/sync.py_230 = compute(230)"
+            },
+            {
+              "line_no": 231,
+              "text": "line_provisioning/sync.py_231 = compute(231)"
+            },
+            {
+              "line_no": 232,
+              "text": "line_provisioning/sync.py_232 = compute(232)"
+            },
+            {
+              "line_no": 233,
+              "text": "line_provisioning/sync.py_233 = compute(233)"
+            },
+            {
+              "line_no": 234,
+              "text": "line_provisioning/sync.py_234 = compute(234)"
+            },
+            {
+              "line_no": 235,
+              "text": "line_provisioning/sync.py_235 = compute(235)"
+            },
+            {
+              "line_no": 236,
+              "text": "line_provisioning/sync.py_236 = compute(236)"
+            },
+            {
+              "line_no": 237,
+              "text": "line_provisioning/sync.py_237 = compute(237)"
+            },
+            {
+              "line_no": 238,
+              "text": "line_provisioning/sync.py_238 = compute(238)"
+            },
+            {
+              "line_no": 239,
+              "text": "line_provisioning/sync.py_239 = compute(239)"
+            }
+          ],
+          "hunk_id": "provisioning/sync.py#4",
+          "new_lines": 43,
+          "new_start": 200,
+          "old_lines": 3,
+          "old_start": 197,
+          "path": "provisioning/sync.py",
+          "removed_count": 0
+        },
+        {
+          "added": [
+            {
+              "line_no": 247,
+              "text": "assert guard_247(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 248,
+              "text": "assert guard_248(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 249,
+              "text": "assert guard_249(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 250,
+              "text": "assert guard_250(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 251,
+              "text": "assert guard_251(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 252,
+              "text": "assert guard_252(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 253,
+              "text": "assert guard_253(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 254,
+              "text": "assert guard_254(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 255,
+              "text": "assert guard_255(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 256,
+              "text": "assert guard_256(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 257,
+              "text": "assert guard_257(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 258,
+              "text": "assert guard_258(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 259,
+              "text": "assert guard_259(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 260,
+              "text": "assert guard_260(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 261,
+              "text": "assert guard_261(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 262,
+              "text": "assert guard_262(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 263,
+              "text": "assert guard_263(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 264,
+              "text": "assert guard_264(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 265,
+              "text": "assert guard_265(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 266,
+              "text": "assert guard_266(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 267,
+              "text": "assert guard_267(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 268,
+              "text": "assert guard_268(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 269,
+              "text": "assert guard_269(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 270,
+              "text": "assert guard_270(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 271,
+              "text": "assert guard_271(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 272,
+              "text": "assert guard_272(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 273,
+              "text": "assert guard_273(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 274,
+              "text": "assert guard_274(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 275,
+              "text": "assert guard_275(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 276,
+              "text": "assert guard_276(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 277,
+              "text": "assert guard_277(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 278,
+              "text": "assert guard_278(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 279,
+              "text": "assert guard_279(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 280,
+              "text": "assert guard_280(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 281,
+              "text": "assert guard_281(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 282,
+              "text": "assert guard_282(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 283,
+              "text": "assert guard_283(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 284,
+              "text": "assert guard_284(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 285,
+              "text": "assert guard_285(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 286,
+              "text": "assert guard_286(ctx) is not None  # hand-written"
+            }
+          ],
+          "hunk_id": "provisioning/sync.py#5",
+          "new_lines": 43,
+          "new_start": 247,
+          "old_lines": 3,
+          "old_start": 244,
+          "path": "provisioning/sync.py",
+          "removed_count": 0
+        },
+        {
+          "added": [
+            {
+              "line_no": 294,
+              "text": "assert guard_294(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 295,
+              "text": "assert guard_295(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 296,
+              "text": "assert guard_296(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 297,
+              "text": "assert guard_297(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 298,
+              "text": "assert guard_298(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 299,
+              "text": "assert guard_299(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 300,
+              "text": "assert guard_300(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 301,
+              "text": "assert guard_301(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 302,
+              "text": "assert guard_302(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 303,
+              "text": "assert guard_303(ctx) is not None  # hand-written"
+            }
+          ],
+          "hunk_id": "provisioning/sync.py#6",
+          "new_lines": 13,
+          "new_start": 294,
+          "old_lines": 3,
+          "old_start": 291,
+          "path": "provisioning/sync.py",
+          "removed_count": 0
+        }
+      ],
+      "patch_present": true,
+      "path": "provisioning/sync.py",
+      "status": "modified"
+    },
+    {
+      "additions": 72,
+      "deletions": 1,
+      "hunks": [
+        {
+          "added": [
+            {
+              "line_no": 12,
+              "text": "line_provisioning/backoff.py_12 = compute(12)"
+            },
+            {
+              "line_no": 13,
+              "text": "line_provisioning/backoff.py_13 = compute(13)"
+            },
+            {
+              "line_no": 14,
+              "text": "line_provisioning/backoff.py_14 = compute(14)"
+            },
+            {
+              "line_no": 15,
+              "text": "line_provisioning/backoff.py_15 = compute(15)"
+            },
+            {
+              "line_no": 16,
+              "text": "line_provisioning/backoff.py_16 = compute(16)"
+            },
+            {
+              "line_no": 17,
+              "text": "line_provisioning/backoff.py_17 = compute(17)"
+            },
+            {
+              "line_no": 18,
+              "text": "line_provisioning/backoff.py_18 = compute(18)"
+            },
+            {
+              "line_no": 19,
+              "text": "line_provisioning/backoff.py_19 = compute(19)"
+            },
+            {
+              "line_no": 20,
+              "text": "line_provisioning/backoff.py_20 = compute(20)"
+            },
+            {
+              "line_no": 21,
+              "text": "line_provisioning/backoff.py_21 = compute(21)"
+            },
+            {
+              "line_no": 22,
+              "text": "line_provisioning/backoff.py_22 = compute(22)"
+            },
+            {
+              "line_no": 23,
+              "text": "line_provisioning/backoff.py_23 = compute(23)"
+            },
+            {
+              "line_no": 24,
+              "text": "line_provisioning/backoff.py_24 = compute(24)"
+            },
+            {
+              "line_no": 25,
+              "text": "line_provisioning/backoff.py_25 = compute(25)"
+            },
+            {
+              "line_no": 26,
+              "text": "line_provisioning/backoff.py_26 = compute(26)"
+            },
+            {
+              "line_no": 27,
+              "text": "line_provisioning/backoff.py_27 = compute(27)"
+            },
+            {
+              "line_no": 28,
+              "text": "line_provisioning/backoff.py_28 = compute(28)"
+            },
+            {
+              "line_no": 29,
+              "text": "line_provisioning/backoff.py_29 = compute(29)"
+            },
+            {
+              "line_no": 30,
+              "text": "line_provisioning/backoff.py_30 = compute(30)"
+            },
+            {
+              "line_no": 31,
+              "text": "line_provisioning/backoff.py_31 = compute(31)"
+            },
+            {
+              "line_no": 32,
+              "text": "line_provisioning/backoff.py_32 = compute(32)"
+            },
+            {
+              "line_no": 33,
+              "text": "line_provisioning/backoff.py_33 = compute(33)"
+            },
+            {
+              "line_no": 34,
+              "text": "line_provisioning/backoff.py_34 = compute(34)"
+            },
+            {
+              "line_no": 35,
+              "text": "line_provisioning/backoff.py_35 = compute(35)"
+            },
+            {
+              "line_no": 36,
+              "text": "line_provisioning/backoff.py_36 = compute(36)"
+            },
+            {
+              "line_no": 37,
+              "text": "line_provisioning/backoff.py_37 = compute(37)"
+            },
+            {
+              "line_no": 38,
+              "text": "line_provisioning/backoff.py_38 = compute(38)"
+            },
+            {
+              "line_no": 39,
+              "text": "line_provisioning/backoff.py_39 = compute(39)"
+            },
+            {
+              "line_no": 40,
+              "text": "line_provisioning/backoff.py_40 = compute(40)"
+            },
+            {
+              "line_no": 41,
+              "text": "line_provisioning/backoff.py_41 = compute(41)"
+            },
+            {
+              "line_no": 42,
+              "text": "line_provisioning/backoff.py_42 = compute(42)"
+            },
+            {
+              "line_no": 43,
+              "text": "line_provisioning/backoff.py_43 = compute(43)"
+            },
+            {
+              "line_no": 44,
+              "text": "line_provisioning/backoff.py_44 = compute(44)"
+            },
+            {
+              "line_no": 45,
+              "text": "line_provisioning/backoff.py_45 = compute(45)"
+            },
+            {
+              "line_no": 46,
+              "text": "line_provisioning/backoff.py_46 = compute(46)"
+            },
+            {
+              "line_no": 47,
+              "text": "line_provisioning/backoff.py_47 = compute(47)"
+            },
+            {
+              "line_no": 48,
+              "text": "line_provisioning/backoff.py_48 = compute(48)"
+            },
+            {
+              "line_no": 49,
+              "text": "line_provisioning/backoff.py_49 = compute(49)"
+            },
+            {
+              "line_no": 50,
+              "text": "line_provisioning/backoff.py_50 = compute(50)"
+            },
+            {
+              "line_no": 51,
+              "text": "line_provisioning/backoff.py_51 = compute(51)"
+            }
+          ],
+          "hunk_id": "provisioning/backoff.py#0",
+          "new_lines": 43,
+          "new_start": 12,
+          "old_lines": 3,
+          "old_start": 9,
+          "path": "provisioning/backoff.py",
+          "removed_count": 1
+        },
+        {
+          "added": [
+            {
+              "line_no": 59,
+              "text": "line_provisioning/backoff.py_59 = compute(59)"
+            },
+            {
+              "line_no": 60,
+              "text": "line_provisioning/backoff.py_60 = compute(60)"
+            },
+            {
+              "line_no": 61,
+              "text": "line_provisioning/backoff.py_61 = compute(61)"
+            },
+            {
+              "line_no": 62,
+              "text": "line_provisioning/backoff.py_62 = compute(62)"
+            },
+            {
+              "line_no": 63,
+              "text": "line_provisioning/backoff.py_63 = compute(63)"
+            },
+            {
+              "line_no": 64,
+              "text": "line_provisioning/backoff.py_64 = compute(64)"
+            },
+            {
+              "line_no": 65,
+              "text": "line_provisioning/backoff.py_65 = compute(65)"
+            },
+            {
+              "line_no": 66,
+              "text": "line_provisioning/backoff.py_66 = compute(66)"
+            },
+            {
+              "line_no": 67,
+              "text": "line_provisioning/backoff.py_67 = compute(67)"
+            },
+            {
+              "line_no": 68,
+              "text": "line_provisioning/backoff.py_68 = compute(68)"
+            },
+            {
+              "line_no": 69,
+              "text": "line_provisioning/backoff.py_69 = compute(69)"
+            },
+            {
+              "line_no": 70,
+              "text": "line_provisioning/backoff.py_70 = compute(70)"
+            },
+            {
+              "line_no": 71,
+              "text": "line_provisioning/backoff.py_71 = compute(71)"
+            },
+            {
+              "line_no": 72,
+              "text": "line_provisioning/backoff.py_72 = compute(72)"
+            },
+            {
+              "line_no": 73,
+              "text": "line_provisioning/backoff.py_73 = compute(73)"
+            },
+            {
+              "line_no": 74,
+              "text": "line_provisioning/backoff.py_74 = compute(74)"
+            },
+            {
+              "line_no": 75,
+              "text": "line_provisioning/backoff.py_75 = compute(75)"
+            },
+            {
+              "line_no": 76,
+              "text": "line_provisioning/backoff.py_76 = compute(76)"
+            },
+            {
+              "line_no": 77,
+              "text": "line_provisioning/backoff.py_77 = compute(77)"
+            },
+            {
+              "line_no": 78,
+              "text": "line_provisioning/backoff.py_78 = compute(78)"
+            },
+            {
+              "line_no": 79,
+              "text": "line_provisioning/backoff.py_79 = compute(79)"
+            },
+            {
+              "line_no": 80,
+              "text": "line_provisioning/backoff.py_80 = compute(80)"
+            },
+            {
+              "line_no": 81,
+              "text": "line_provisioning/backoff.py_81 = compute(81)"
+            },
+            {
+              "line_no": 82,
+              "text": "line_provisioning/backoff.py_82 = compute(82)"
+            },
+            {
+              "line_no": 83,
+              "text": "assert guard_83(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 84,
+              "text": "assert guard_84(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 85,
+              "text": "assert guard_85(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 86,
+              "text": "assert guard_86(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 87,
+              "text": "assert guard_87(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 88,
+              "text": "assert guard_88(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 89,
+              "text": "assert guard_89(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 90,
+              "text": "assert guard_90(ctx) is not None  # hand-written"
+            }
+          ],
+          "hunk_id": "provisioning/backoff.py#1",
+          "new_lines": 35,
+          "new_start": 59,
+          "old_lines": 3,
+          "old_start": 56,
+          "path": "provisioning/backoff.py",
+          "removed_count": 0
+        }
+      ],
+      "patch_present": true,
+      "path": "provisioning/backoff.py",
+      "status": "modified"
+    },
+    {
+      "additions": 210,
+      "deletions": 1,
+      "hunks": [
+        {
+          "added": [
+            {
+              "line_no": 12,
+              "text": "line_entitlement/grants.py_12 = compute(12)"
+            },
+            {
+              "line_no": 13,
+              "text": "line_entitlement/grants.py_13 = compute(13)"
+            },
+            {
+              "line_no": 14,
+              "text": "line_entitlement/grants.py_14 = compute(14)"
+            },
+            {
+              "line_no": 15,
+              "text": "line_entitlement/grants.py_15 = compute(15)"
+            },
+            {
+              "line_no": 16,
+              "text": "line_entitlement/grants.py_16 = compute(16)"
+            },
+            {
+              "line_no": 17,
+              "text": "line_entitlement/grants.py_17 = compute(17)"
+            },
+            {
+              "line_no": 18,
+              "text": "line_entitlement/grants.py_18 = compute(18)"
+            },
+            {
+              "line_no": 19,
+              "text": "line_entitlement/grants.py_19 = compute(19)"
+            },
+            {
+              "line_no": 20,
+              "text": "line_entitlement/grants.py_20 = compute(20)"
+            },
+            {
+              "line_no": 21,
+              "text": "line_entitlement/grants.py_21 = compute(21)"
+            },
+            {
+              "line_no": 22,
+              "text": "line_entitlement/grants.py_22 = compute(22)"
+            },
+            {
+              "line_no": 23,
+              "text": "line_entitlement/grants.py_23 = compute(23)"
+            },
+            {
+              "line_no": 24,
+              "text": "line_entitlement/grants.py_24 = compute(24)"
+            },
+            {
+              "line_no": 25,
+              "text": "line_entitlement/grants.py_25 = compute(25)"
+            },
+            {
+              "line_no": 26,
+              "text": "line_entitlement/grants.py_26 = compute(26)"
+            },
+            {
+              "line_no": 27,
+              "text": "line_entitlement/grants.py_27 = compute(27)"
+            },
+            {
+              "line_no": 28,
+              "text": "line_entitlement/grants.py_28 = compute(28)"
+            },
+            {
+              "line_no": 29,
+              "text": "line_entitlement/grants.py_29 = compute(29)"
+            },
+            {
+              "line_no": 30,
+              "text": "line_entitlement/grants.py_30 = compute(30)"
+            },
+            {
+              "line_no": 31,
+              "text": "line_entitlement/grants.py_31 = compute(31)"
+            },
+            {
+              "line_no": 32,
+              "text": "line_entitlement/grants.py_32 = compute(32)"
+            },
+            {
+              "line_no": 33,
+              "text": "line_entitlement/grants.py_33 = compute(33)"
+            },
+            {
+              "line_no": 34,
+              "text": "line_entitlement/grants.py_34 = compute(34)"
+            },
+            {
+              "line_no": 35,
+              "text": "line_entitlement/grants.py_35 = compute(35)"
+            },
+            {
+              "line_no": 36,
+              "text": "line_entitlement/grants.py_36 = compute(36)"
+            },
+            {
+              "line_no": 37,
+              "text": "line_entitlement/grants.py_37 = compute(37)"
+            },
+            {
+              "line_no": 38,
+              "text": "line_entitlement/grants.py_38 = compute(38)"
+            },
+            {
+              "line_no": 39,
+              "text": "line_entitlement/grants.py_39 = compute(39)"
+            },
+            {
+              "line_no": 40,
+              "text": "line_entitlement/grants.py_40 = compute(40)"
+            },
+            {
+              "line_no": 41,
+              "text": "line_entitlement/grants.py_41 = compute(41)"
+            },
+            {
+              "line_no": 42,
+              "text": "line_entitlement/grants.py_42 = compute(42)"
+            },
+            {
+              "line_no": 43,
+              "text": "line_entitlement/grants.py_43 = compute(43)"
+            },
+            {
+              "line_no": 44,
+              "text": "line_entitlement/grants.py_44 = compute(44)"
+            },
+            {
+              "line_no": 45,
+              "text": "line_entitlement/grants.py_45 = compute(45)"
+            },
+            {
+              "line_no": 46,
+              "text": "line_entitlement/grants.py_46 = compute(46)"
+            },
+            {
+              "line_no": 47,
+              "text": "line_entitlement/grants.py_47 = compute(47)"
+            },
+            {
+              "line_no": 48,
+              "text": "line_entitlement/grants.py_48 = compute(48)"
+            },
+            {
+              "line_no": 49,
+              "text": "line_entitlement/grants.py_49 = compute(49)"
+            },
+            {
+              "line_no": 50,
+              "text": "line_entitlement/grants.py_50 = compute(50)"
+            },
+            {
+              "line_no": 51,
+              "text": "line_entitlement/grants.py_51 = compute(51)"
+            }
+          ],
+          "hunk_id": "entitlement/grants.py#0",
+          "new_lines": 43,
+          "new_start": 12,
+          "old_lines": 3,
+          "old_start": 9,
+          "path": "entitlement/grants.py",
+          "removed_count": 1
+        },
+        {
+          "added": [
+            {
+              "line_no": 59,
+              "text": "line_entitlement/grants.py_59 = compute(59)"
+            },
+            {
+              "line_no": 60,
+              "text": "line_entitlement/grants.py_60 = compute(60)"
+            },
+            {
+              "line_no": 61,
+              "text": "line_entitlement/grants.py_61 = compute(61)"
+            },
+            {
+              "line_no": 62,
+              "text": "line_entitlement/grants.py_62 = compute(62)"
+            },
+            {
+              "line_no": 63,
+              "text": "line_entitlement/grants.py_63 = compute(63)"
+            },
+            {
+              "line_no": 64,
+              "text": "line_entitlement/grants.py_64 = compute(64)"
+            },
+            {
+              "line_no": 65,
+              "text": "line_entitlement/grants.py_65 = compute(65)"
+            },
+            {
+              "line_no": 66,
+              "text": "line_entitlement/grants.py_66 = compute(66)"
+            },
+            {
+              "line_no": 67,
+              "text": "line_entitlement/grants.py_67 = compute(67)"
+            },
+            {
+              "line_no": 68,
+              "text": "line_entitlement/grants.py_68 = compute(68)"
+            },
+            {
+              "line_no": 69,
+              "text": "line_entitlement/grants.py_69 = compute(69)"
+            },
+            {
+              "line_no": 70,
+              "text": "line_entitlement/grants.py_70 = compute(70)"
+            },
+            {
+              "line_no": 71,
+              "text": "line_entitlement/grants.py_71 = compute(71)"
+            },
+            {
+              "line_no": 72,
+              "text": "line_entitlement/grants.py_72 = compute(72)"
+            },
+            {
+              "line_no": 73,
+              "text": "line_entitlement/grants.py_73 = compute(73)"
+            },
+            {
+              "line_no": 74,
+              "text": "line_entitlement/grants.py_74 = compute(74)"
+            },
+            {
+              "line_no": 75,
+              "text": "line_entitlement/grants.py_75 = compute(75)"
+            },
+            {
+              "line_no": 76,
+              "text": "line_entitlement/grants.py_76 = compute(76)"
+            },
+            {
+              "line_no": 77,
+              "text": "line_entitlement/grants.py_77 = compute(77)"
+            },
+            {
+              "line_no": 78,
+              "text": "line_entitlement/grants.py_78 = compute(78)"
+            },
+            {
+              "line_no": 79,
+              "text": "line_entitlement/grants.py_79 = compute(79)"
+            },
+            {
+              "line_no": 80,
+              "text": "line_entitlement/grants.py_80 = compute(80)"
+            },
+            {
+              "line_no": 81,
+              "text": "line_entitlement/grants.py_81 = compute(81)"
+            },
+            {
+              "line_no": 82,
+              "text": "line_entitlement/grants.py_82 = compute(82)"
+            },
+            {
+              "line_no": 83,
+              "text": "line_entitlement/grants.py_83 = compute(83)"
+            },
+            {
+              "line_no": 84,
+              "text": "line_entitlement/grants.py_84 = compute(84)"
+            },
+            {
+              "line_no": 85,
+              "text": "line_entitlement/grants.py_85 = compute(85)"
+            },
+            {
+              "line_no": 86,
+              "text": "line_entitlement/grants.py_86 = compute(86)"
+            },
+            {
+              "line_no": 87,
+              "text": "line_entitlement/grants.py_87 = compute(87)"
+            },
+            {
+              "line_no": 88,
+              "text": "line_entitlement/grants.py_88 = compute(88)"
+            },
+            {
+              "line_no": 89,
+              "text": "line_entitlement/grants.py_89 = compute(89)"
+            },
+            {
+              "line_no": 90,
+              "text": "line_entitlement/grants.py_90 = compute(90)"
+            },
+            {
+              "line_no": 91,
+              "text": "line_entitlement/grants.py_91 = compute(91)"
+            },
+            {
+              "line_no": 92,
+              "text": "line_entitlement/grants.py_92 = compute(92)"
+            },
+            {
+              "line_no": 93,
+              "text": "line_entitlement/grants.py_93 = compute(93)"
+            },
+            {
+              "line_no": 94,
+              "text": "line_entitlement/grants.py_94 = compute(94)"
+            },
+            {
+              "line_no": 95,
+              "text": "line_entitlement/grants.py_95 = compute(95)"
+            },
+            {
+              "line_no": 96,
+              "text": "line_entitlement/grants.py_96 = compute(96)"
+            },
+            {
+              "line_no": 97,
+              "text": "line_entitlement/grants.py_97 = compute(97)"
+            },
+            {
+              "line_no": 98,
+              "text": "line_entitlement/grants.py_98 = compute(98)"
+            }
+          ],
+          "hunk_id": "entitlement/grants.py#1",
+          "new_lines": 43,
+          "new_start": 59,
+          "old_lines": 3,
+          "old_start": 56,
+          "path": "entitlement/grants.py",
+          "removed_count": 0
+        },
+        {
+          "added": [
+            {
+              "line_no": 106,
+              "text": "line_entitlement/grants.py_106 = compute(106)"
+            },
+            {
+              "line_no": 107,
+              "text": "line_entitlement/grants.py_107 = compute(107)"
+            },
+            {
+              "line_no": 108,
+              "text": "line_entitlement/grants.py_108 = compute(108)"
+            },
+            {
+              "line_no": 109,
+              "text": "line_entitlement/grants.py_109 = compute(109)"
+            },
+            {
+              "line_no": 110,
+              "text": "line_entitlement/grants.py_110 = compute(110)"
+            },
+            {
+              "line_no": 111,
+              "text": "line_entitlement/grants.py_111 = compute(111)"
+            },
+            {
+              "line_no": 112,
+              "text": "line_entitlement/grants.py_112 = compute(112)"
+            },
+            {
+              "line_no": 113,
+              "text": "line_entitlement/grants.py_113 = compute(113)"
+            },
+            {
+              "line_no": 114,
+              "text": "line_entitlement/grants.py_114 = compute(114)"
+            },
+            {
+              "line_no": 115,
+              "text": "line_entitlement/grants.py_115 = compute(115)"
+            },
+            {
+              "line_no": 116,
+              "text": "line_entitlement/grants.py_116 = compute(116)"
+            },
+            {
+              "line_no": 117,
+              "text": "line_entitlement/grants.py_117 = compute(117)"
+            },
+            {
+              "line_no": 118,
+              "text": "line_entitlement/grants.py_118 = compute(118)"
+            },
+            {
+              "line_no": 119,
+              "text": "line_entitlement/grants.py_119 = compute(119)"
+            },
+            {
+              "line_no": 120,
+              "text": "line_entitlement/grants.py_120 = compute(120)"
+            },
+            {
+              "line_no": 121,
+              "text": "line_entitlement/grants.py_121 = compute(121)"
+            },
+            {
+              "line_no": 122,
+              "text": "line_entitlement/grants.py_122 = compute(122)"
+            },
+            {
+              "line_no": 123,
+              "text": "line_entitlement/grants.py_123 = compute(123)"
+            },
+            {
+              "line_no": 124,
+              "text": "line_entitlement/grants.py_124 = compute(124)"
+            },
+            {
+              "line_no": 125,
+              "text": "line_entitlement/grants.py_125 = compute(125)"
+            },
+            {
+              "line_no": 126,
+              "text": "line_entitlement/grants.py_126 = compute(126)"
+            },
+            {
+              "line_no": 127,
+              "text": "line_entitlement/grants.py_127 = compute(127)"
+            },
+            {
+              "line_no": 128,
+              "text": "line_entitlement/grants.py_128 = compute(128)"
+            },
+            {
+              "line_no": 129,
+              "text": "line_entitlement/grants.py_129 = compute(129)"
+            },
+            {
+              "line_no": 130,
+              "text": "line_entitlement/grants.py_130 = compute(130)"
+            },
+            {
+              "line_no": 131,
+              "text": "line_entitlement/grants.py_131 = compute(131)"
+            },
+            {
+              "line_no": 132,
+              "text": "line_entitlement/grants.py_132 = compute(132)"
+            },
+            {
+              "line_no": 133,
+              "text": "line_entitlement/grants.py_133 = compute(133)"
+            },
+            {
+              "line_no": 134,
+              "text": "line_entitlement/grants.py_134 = compute(134)"
+            },
+            {
+              "line_no": 135,
+              "text": "line_entitlement/grants.py_135 = compute(135)"
+            },
+            {
+              "line_no": 136,
+              "text": "line_entitlement/grants.py_136 = compute(136)"
+            },
+            {
+              "line_no": 137,
+              "text": "line_entitlement/grants.py_137 = compute(137)"
+            },
+            {
+              "line_no": 138,
+              "text": "line_entitlement/grants.py_138 = compute(138)"
+            },
+            {
+              "line_no": 139,
+              "text": "line_entitlement/grants.py_139 = compute(139)"
+            },
+            {
+              "line_no": 140,
+              "text": "line_entitlement/grants.py_140 = compute(140)"
+            },
+            {
+              "line_no": 141,
+              "text": "line_entitlement/grants.py_141 = compute(141)"
+            },
+            {
+              "line_no": 142,
+              "text": "line_entitlement/grants.py_142 = compute(142)"
+            },
+            {
+              "line_no": 143,
+              "text": "line_entitlement/grants.py_143 = compute(143)"
+            },
+            {
+              "line_no": 144,
+              "text": "line_entitlement/grants.py_144 = compute(144)"
+            },
+            {
+              "line_no": 145,
+              "text": "line_entitlement/grants.py_145 = compute(145)"
+            }
+          ],
+          "hunk_id": "entitlement/grants.py#2",
+          "new_lines": 43,
+          "new_start": 106,
+          "old_lines": 3,
+          "old_start": 103,
+          "path": "entitlement/grants.py",
+          "removed_count": 0
+        },
+        {
+          "added": [
+            {
+              "line_no": 153,
+              "text": "line_entitlement/grants.py_153 = compute(153)"
+            },
+            {
+              "line_no": 154,
+              "text": "line_entitlement/grants.py_154 = compute(154)"
+            },
+            {
+              "line_no": 155,
+              "text": "line_entitlement/grants.py_155 = compute(155)"
+            },
+            {
+              "line_no": 156,
+              "text": "line_entitlement/grants.py_156 = compute(156)"
+            },
+            {
+              "line_no": 157,
+              "text": "line_entitlement/grants.py_157 = compute(157)"
+            },
+            {
+              "line_no": 158,
+              "text": "line_entitlement/grants.py_158 = compute(158)"
+            },
+            {
+              "line_no": 159,
+              "text": "line_entitlement/grants.py_159 = compute(159)"
+            },
+            {
+              "line_no": 160,
+              "text": "line_entitlement/grants.py_160 = compute(160)"
+            },
+            {
+              "line_no": 161,
+              "text": "line_entitlement/grants.py_161 = compute(161)"
+            },
+            {
+              "line_no": 162,
+              "text": "line_entitlement/grants.py_162 = compute(162)"
+            },
+            {
+              "line_no": 163,
+              "text": "line_entitlement/grants.py_163 = compute(163)"
+            },
+            {
+              "line_no": 164,
+              "text": "line_entitlement/grants.py_164 = compute(164)"
+            },
+            {
+              "line_no": 165,
+              "text": "line_entitlement/grants.py_165 = compute(165)"
+            },
+            {
+              "line_no": 166,
+              "text": "line_entitlement/grants.py_166 = compute(166)"
+            },
+            {
+              "line_no": 167,
+              "text": "line_entitlement/grants.py_167 = compute(167)"
+            },
+            {
+              "line_no": 168,
+              "text": "line_entitlement/grants.py_168 = compute(168)"
+            },
+            {
+              "line_no": 169,
+              "text": "line_entitlement/grants.py_169 = compute(169)"
+            },
+            {
+              "line_no": 170,
+              "text": "line_entitlement/grants.py_170 = compute(170)"
+            },
+            {
+              "line_no": 171,
+              "text": "line_entitlement/grants.py_171 = compute(171)"
+            },
+            {
+              "line_no": 172,
+              "text": "line_entitlement/grants.py_172 = compute(172)"
+            },
+            {
+              "line_no": 173,
+              "text": "line_entitlement/grants.py_173 = compute(173)"
+            },
+            {
+              "line_no": 174,
+              "text": "line_entitlement/grants.py_174 = compute(174)"
+            },
+            {
+              "line_no": 175,
+              "text": "line_entitlement/grants.py_175 = compute(175)"
+            },
+            {
+              "line_no": 176,
+              "text": "line_entitlement/grants.py_176 = compute(176)"
+            },
+            {
+              "line_no": 177,
+              "text": "line_entitlement/grants.py_177 = compute(177)"
+            },
+            {
+              "line_no": 178,
+              "text": "line_entitlement/grants.py_178 = compute(178)"
+            },
+            {
+              "line_no": 179,
+              "text": "line_entitlement/grants.py_179 = compute(179)"
+            },
+            {
+              "line_no": 180,
+              "text": "line_entitlement/grants.py_180 = compute(180)"
+            },
+            {
+              "line_no": 181,
+              "text": "line_entitlement/grants.py_181 = compute(181)"
+            },
+            {
+              "line_no": 182,
+              "text": "line_entitlement/grants.py_182 = compute(182)"
+            },
+            {
+              "line_no": 183,
+              "text": "line_entitlement/grants.py_183 = compute(183)"
+            },
+            {
+              "line_no": 184,
+              "text": "line_entitlement/grants.py_184 = compute(184)"
+            },
+            {
+              "line_no": 185,
+              "text": "line_entitlement/grants.py_185 = compute(185)"
+            },
+            {
+              "line_no": 186,
+              "text": "line_entitlement/grants.py_186 = compute(186)"
+            },
+            {
+              "line_no": 187,
+              "text": "line_entitlement/grants.py_187 = compute(187)"
+            },
+            {
+              "line_no": 188,
+              "text": "line_entitlement/grants.py_188 = compute(188)"
+            },
+            {
+              "line_no": 189,
+              "text": "line_entitlement/grants.py_189 = compute(189)"
+            },
+            {
+              "line_no": 190,
+              "text": "line_entitlement/grants.py_190 = compute(190)"
+            },
+            {
+              "line_no": 191,
+              "text": "line_entitlement/grants.py_191 = compute(191)"
+            },
+            {
+              "line_no": 192,
+              "text": "line_entitlement/grants.py_192 = compute(192)"
+            }
+          ],
+          "hunk_id": "entitlement/grants.py#3",
+          "new_lines": 43,
+          "new_start": 153,
+          "old_lines": 3,
+          "old_start": 150,
+          "path": "entitlement/grants.py",
+          "removed_count": 0
+        },
+        {
+          "added": [
+            {
+              "line_no": 200,
+              "text": "line_entitlement/grants.py_200 = compute(200)"
+            },
+            {
+              "line_no": 201,
+              "text": "line_entitlement/grants.py_201 = compute(201)"
+            },
+            {
+              "line_no": 202,
+              "text": "line_entitlement/grants.py_202 = compute(202)"
+            },
+            {
+              "line_no": 203,
+              "text": "line_entitlement/grants.py_203 = compute(203)"
+            },
+            {
+              "line_no": 204,
+              "text": "line_entitlement/grants.py_204 = compute(204)"
+            },
+            {
+              "line_no": 205,
+              "text": "line_entitlement/grants.py_205 = compute(205)"
+            },
+            {
+              "line_no": 206,
+              "text": "line_entitlement/grants.py_206 = compute(206)"
+            },
+            {
+              "line_no": 207,
+              "text": "line_entitlement/grants.py_207 = compute(207)"
+            },
+            {
+              "line_no": 208,
+              "text": "line_entitlement/grants.py_208 = compute(208)"
+            },
+            {
+              "line_no": 209,
+              "text": "line_entitlement/grants.py_209 = compute(209)"
+            },
+            {
+              "line_no": 210,
+              "text": "line_entitlement/grants.py_210 = compute(210)"
+            },
+            {
+              "line_no": 211,
+              "text": "line_entitlement/grants.py_211 = compute(211)"
+            },
+            {
+              "line_no": 212,
+              "text": "line_entitlement/grants.py_212 = compute(212)"
+            },
+            {
+              "line_no": 213,
+              "text": "line_entitlement/grants.py_213 = compute(213)"
+            },
+            {
+              "line_no": 214,
+              "text": "line_entitlement/grants.py_214 = compute(214)"
+            },
+            {
+              "line_no": 215,
+              "text": "line_entitlement/grants.py_215 = compute(215)"
+            },
+            {
+              "line_no": 216,
+              "text": "line_entitlement/grants.py_216 = compute(216)"
+            },
+            {
+              "line_no": 217,
+              "text": "line_entitlement/grants.py_217 = compute(217)"
+            },
+            {
+              "line_no": 218,
+              "text": "line_entitlement/grants.py_218 = compute(218)"
+            },
+            {
+              "line_no": 219,
+              "text": "line_entitlement/grants.py_219 = compute(219)"
+            },
+            {
+              "line_no": 220,
+              "text": "line_entitlement/grants.py_220 = compute(220)"
+            },
+            {
+              "line_no": 221,
+              "text": "line_entitlement/grants.py_221 = compute(221)"
+            },
+            {
+              "line_no": 222,
+              "text": "line_entitlement/grants.py_222 = compute(222)"
+            },
+            {
+              "line_no": 223,
+              "text": "line_entitlement/grants.py_223 = compute(223)"
+            },
+            {
+              "line_no": 224,
+              "text": "line_entitlement/grants.py_224 = compute(224)"
+            },
+            {
+              "line_no": 225,
+              "text": "line_entitlement/grants.py_225 = compute(225)"
+            },
+            {
+              "line_no": 226,
+              "text": "line_entitlement/grants.py_226 = compute(226)"
+            },
+            {
+              "line_no": 227,
+              "text": "line_entitlement/grants.py_227 = compute(227)"
+            },
+            {
+              "line_no": 228,
+              "text": "line_entitlement/grants.py_228 = compute(228)"
+            },
+            {
+              "line_no": 229,
+              "text": "line_entitlement/grants.py_229 = compute(229)"
+            },
+            {
+              "line_no": 230,
+              "text": "line_entitlement/grants.py_230 = compute(230)"
+            },
+            {
+              "line_no": 231,
+              "text": "line_entitlement/grants.py_231 = compute(231)"
+            },
+            {
+              "line_no": 232,
+              "text": "line_entitlement/grants.py_232 = compute(232)"
+            },
+            {
+              "line_no": 233,
+              "text": "line_entitlement/grants.py_233 = compute(233)"
+            },
+            {
+              "line_no": 234,
+              "text": "line_entitlement/grants.py_234 = compute(234)"
+            },
+            {
+              "line_no": 235,
+              "text": "line_entitlement/grants.py_235 = compute(235)"
+            },
+            {
+              "line_no": 236,
+              "text": "line_entitlement/grants.py_236 = compute(236)"
+            },
+            {
+              "line_no": 237,
+              "text": "line_entitlement/grants.py_237 = compute(237)"
+            },
+            {
+              "line_no": 238,
+              "text": "line_entitlement/grants.py_238 = compute(238)"
+            },
+            {
+              "line_no": 239,
+              "text": "line_entitlement/grants.py_239 = compute(239)"
+            }
+          ],
+          "hunk_id": "entitlement/grants.py#4",
+          "new_lines": 43,
+          "new_start": 200,
+          "old_lines": 3,
+          "old_start": 197,
+          "path": "entitlement/grants.py",
+          "removed_count": 0
+        },
+        {
+          "added": [
+            {
+              "line_no": 247,
+              "text": "line_entitlement/grants.py_247 = compute(247)"
+            },
+            {
+              "line_no": 248,
+              "text": "line_entitlement/grants.py_248 = compute(248)"
+            },
+            {
+              "line_no": 249,
+              "text": "line_entitlement/grants.py_249 = compute(249)"
+            },
+            {
+              "line_no": 250,
+              "text": "line_entitlement/grants.py_250 = compute(250)"
+            },
+            {
+              "line_no": 251,
+              "text": "line_entitlement/grants.py_251 = compute(251)"
+            },
+            {
+              "line_no": 252,
+              "text": "line_entitlement/grants.py_252 = compute(252)"
+            },
+            {
+              "line_no": 253,
+              "text": "line_entitlement/grants.py_253 = compute(253)"
+            },
+            {
+              "line_no": 254,
+              "text": "line_entitlement/grants.py_254 = compute(254)"
+            },
+            {
+              "line_no": 255,
+              "text": "line_entitlement/grants.py_255 = compute(255)"
+            },
+            {
+              "line_no": 256,
+              "text": "line_entitlement/grants.py_256 = compute(256)"
+            }
+          ],
+          "hunk_id": "entitlement/grants.py#5",
+          "new_lines": 13,
+          "new_start": 247,
+          "old_lines": 3,
+          "old_start": 244,
+          "path": "entitlement/grants.py",
+          "removed_count": 0
+        }
+      ],
+      "patch_present": true,
+      "path": "entitlement/grants.py",
+      "status": "modified"
+    },
+    {
+      "additions": 130,
+      "deletions": 1,
+      "hunks": [
+        {
+          "added": [
+            {
+              "line_no": 12,
+              "text": "line_cache/reconcile.py_12 = compute(12)"
+            },
+            {
+              "line_no": 13,
+              "text": "line_cache/reconcile.py_13 = compute(13)"
+            },
+            {
+              "line_no": 14,
+              "text": "line_cache/reconcile.py_14 = compute(14)"
+            },
+            {
+              "line_no": 15,
+              "text": "line_cache/reconcile.py_15 = compute(15)"
+            },
+            {
+              "line_no": 16,
+              "text": "line_cache/reconcile.py_16 = compute(16)"
+            },
+            {
+              "line_no": 17,
+              "text": "line_cache/reconcile.py_17 = compute(17)"
+            },
+            {
+              "line_no": 18,
+              "text": "line_cache/reconcile.py_18 = compute(18)"
+            },
+            {
+              "line_no": 19,
+              "text": "line_cache/reconcile.py_19 = compute(19)"
+            },
+            {
+              "line_no": 20,
+              "text": "line_cache/reconcile.py_20 = compute(20)"
+            },
+            {
+              "line_no": 21,
+              "text": "line_cache/reconcile.py_21 = compute(21)"
+            },
+            {
+              "line_no": 22,
+              "text": "line_cache/reconcile.py_22 = compute(22)"
+            },
+            {
+              "line_no": 23,
+              "text": "line_cache/reconcile.py_23 = compute(23)"
+            },
+            {
+              "line_no": 24,
+              "text": "line_cache/reconcile.py_24 = compute(24)"
+            },
+            {
+              "line_no": 25,
+              "text": "line_cache/reconcile.py_25 = compute(25)"
+            },
+            {
+              "line_no": 26,
+              "text": "line_cache/reconcile.py_26 = compute(26)"
+            },
+            {
+              "line_no": 27,
+              "text": "line_cache/reconcile.py_27 = compute(27)"
+            },
+            {
+              "line_no": 28,
+              "text": "line_cache/reconcile.py_28 = compute(28)"
+            },
+            {
+              "line_no": 29,
+              "text": "line_cache/reconcile.py_29 = compute(29)"
+            },
+            {
+              "line_no": 30,
+              "text": "line_cache/reconcile.py_30 = compute(30)"
+            },
+            {
+              "line_no": 31,
+              "text": "line_cache/reconcile.py_31 = compute(31)"
+            },
+            {
+              "line_no": 32,
+              "text": "line_cache/reconcile.py_32 = compute(32)"
+            },
+            {
+              "line_no": 33,
+              "text": "line_cache/reconcile.py_33 = compute(33)"
+            },
+            {
+              "line_no": 34,
+              "text": "line_cache/reconcile.py_34 = compute(34)"
+            },
+            {
+              "line_no": 35,
+              "text": "line_cache/reconcile.py_35 = compute(35)"
+            },
+            {
+              "line_no": 36,
+              "text": "line_cache/reconcile.py_36 = compute(36)"
+            },
+            {
+              "line_no": 37,
+              "text": "line_cache/reconcile.py_37 = compute(37)"
+            },
+            {
+              "line_no": 38,
+              "text": "line_cache/reconcile.py_38 = compute(38)"
+            },
+            {
+              "line_no": 39,
+              "text": "line_cache/reconcile.py_39 = compute(39)"
+            },
+            {
+              "line_no": 40,
+              "text": "line_cache/reconcile.py_40 = compute(40)"
+            },
+            {
+              "line_no": 41,
+              "text": "line_cache/reconcile.py_41 = compute(41)"
+            },
+            {
+              "line_no": 42,
+              "text": "line_cache/reconcile.py_42 = compute(42)"
+            },
+            {
+              "line_no": 43,
+              "text": "line_cache/reconcile.py_43 = compute(43)"
+            },
+            {
+              "line_no": 44,
+              "text": "line_cache/reconcile.py_44 = compute(44)"
+            },
+            {
+              "line_no": 45,
+              "text": "line_cache/reconcile.py_45 = compute(45)"
+            },
+            {
+              "line_no": 46,
+              "text": "line_cache/reconcile.py_46 = compute(46)"
+            },
+            {
+              "line_no": 47,
+              "text": "line_cache/reconcile.py_47 = compute(47)"
+            },
+            {
+              "line_no": 48,
+              "text": "line_cache/reconcile.py_48 = compute(48)"
+            },
+            {
+              "line_no": 49,
+              "text": "line_cache/reconcile.py_49 = compute(49)"
+            },
+            {
+              "line_no": 50,
+              "text": "line_cache/reconcile.py_50 = compute(50)"
+            },
+            {
+              "line_no": 51,
+              "text": "line_cache/reconcile.py_51 = compute(51)"
+            }
+          ],
+          "hunk_id": "cache/reconcile.py#0",
+          "new_lines": 43,
+          "new_start": 12,
+          "old_lines": 3,
+          "old_start": 9,
+          "path": "cache/reconcile.py",
+          "removed_count": 1
+        },
+        {
+          "added": [
+            {
+              "line_no": 59,
+              "text": "line_cache/reconcile.py_59 = compute(59)"
+            },
+            {
+              "line_no": 60,
+              "text": "line_cache/reconcile.py_60 = compute(60)"
+            },
+            {
+              "line_no": 61,
+              "text": "line_cache/reconcile.py_61 = compute(61)"
+            },
+            {
+              "line_no": 62,
+              "text": "line_cache/reconcile.py_62 = compute(62)"
+            },
+            {
+              "line_no": 63,
+              "text": "line_cache/reconcile.py_63 = compute(63)"
+            },
+            {
+              "line_no": 64,
+              "text": "line_cache/reconcile.py_64 = compute(64)"
+            },
+            {
+              "line_no": 65,
+              "text": "line_cache/reconcile.py_65 = compute(65)"
+            },
+            {
+              "line_no": 66,
+              "text": "line_cache/reconcile.py_66 = compute(66)"
+            },
+            {
+              "line_no": 67,
+              "text": "line_cache/reconcile.py_67 = compute(67)"
+            },
+            {
+              "line_no": 68,
+              "text": "line_cache/reconcile.py_68 = compute(68)"
+            },
+            {
+              "line_no": 69,
+              "text": "line_cache/reconcile.py_69 = compute(69)"
+            },
+            {
+              "line_no": 70,
+              "text": "line_cache/reconcile.py_70 = compute(70)"
+            },
+            {
+              "line_no": 71,
+              "text": "line_cache/reconcile.py_71 = compute(71)"
+            },
+            {
+              "line_no": 72,
+              "text": "line_cache/reconcile.py_72 = compute(72)"
+            },
+            {
+              "line_no": 73,
+              "text": "line_cache/reconcile.py_73 = compute(73)"
+            },
+            {
+              "line_no": 74,
+              "text": "line_cache/reconcile.py_74 = compute(74)"
+            },
+            {
+              "line_no": 75,
+              "text": "line_cache/reconcile.py_75 = compute(75)"
+            },
+            {
+              "line_no": 76,
+              "text": "line_cache/reconcile.py_76 = compute(76)"
+            },
+            {
+              "line_no": 77,
+              "text": "line_cache/reconcile.py_77 = compute(77)"
+            },
+            {
+              "line_no": 78,
+              "text": "line_cache/reconcile.py_78 = compute(78)"
+            },
+            {
+              "line_no": 79,
+              "text": "line_cache/reconcile.py_79 = compute(79)"
+            },
+            {
+              "line_no": 80,
+              "text": "line_cache/reconcile.py_80 = compute(80)"
+            },
+            {
+              "line_no": 81,
+              "text": "line_cache/reconcile.py_81 = compute(81)"
+            },
+            {
+              "line_no": 82,
+              "text": "line_cache/reconcile.py_82 = compute(82)"
+            },
+            {
+              "line_no": 83,
+              "text": "line_cache/reconcile.py_83 = compute(83)"
+            },
+            {
+              "line_no": 84,
+              "text": "line_cache/reconcile.py_84 = compute(84)"
+            },
+            {
+              "line_no": 85,
+              "text": "line_cache/reconcile.py_85 = compute(85)"
+            },
+            {
+              "line_no": 86,
+              "text": "line_cache/reconcile.py_86 = compute(86)"
+            },
+            {
+              "line_no": 87,
+              "text": "line_cache/reconcile.py_87 = compute(87)"
+            },
+            {
+              "line_no": 88,
+              "text": "line_cache/reconcile.py_88 = compute(88)"
+            },
+            {
+              "line_no": 89,
+              "text": "line_cache/reconcile.py_89 = compute(89)"
+            },
+            {
+              "line_no": 90,
+              "text": "line_cache/reconcile.py_90 = compute(90)"
+            },
+            {
+              "line_no": 91,
+              "text": "line_cache/reconcile.py_91 = compute(91)"
+            },
+            {
+              "line_no": 92,
+              "text": "line_cache/reconcile.py_92 = compute(92)"
+            },
+            {
+              "line_no": 93,
+              "text": "line_cache/reconcile.py_93 = compute(93)"
+            },
+            {
+              "line_no": 94,
+              "text": "line_cache/reconcile.py_94 = compute(94)"
+            },
+            {
+              "line_no": 95,
+              "text": "line_cache/reconcile.py_95 = compute(95)"
+            },
+            {
+              "line_no": 96,
+              "text": "line_cache/reconcile.py_96 = compute(96)"
+            },
+            {
+              "line_no": 97,
+              "text": "line_cache/reconcile.py_97 = compute(97)"
+            },
+            {
+              "line_no": 98,
+              "text": "line_cache/reconcile.py_98 = compute(98)"
+            }
+          ],
+          "hunk_id": "cache/reconcile.py#1",
+          "new_lines": 43,
+          "new_start": 59,
+          "old_lines": 3,
+          "old_start": 56,
+          "path": "cache/reconcile.py",
+          "removed_count": 0
+        },
+        {
+          "added": [
+            {
+              "line_no": 106,
+              "text": "line_cache/reconcile.py_106 = compute(106)"
+            },
+            {
+              "line_no": 107,
+              "text": "line_cache/reconcile.py_107 = compute(107)"
+            },
+            {
+              "line_no": 108,
+              "text": "line_cache/reconcile.py_108 = compute(108)"
+            },
+            {
+              "line_no": 109,
+              "text": "line_cache/reconcile.py_109 = compute(109)"
+            },
+            {
+              "line_no": 110,
+              "text": "line_cache/reconcile.py_110 = compute(110)"
+            },
+            {
+              "line_no": 111,
+              "text": "line_cache/reconcile.py_111 = compute(111)"
+            },
+            {
+              "line_no": 112,
+              "text": "line_cache/reconcile.py_112 = compute(112)"
+            },
+            {
+              "line_no": 113,
+              "text": "line_cache/reconcile.py_113 = compute(113)"
+            },
+            {
+              "line_no": 114,
+              "text": "line_cache/reconcile.py_114 = compute(114)"
+            },
+            {
+              "line_no": 115,
+              "text": "line_cache/reconcile.py_115 = compute(115)"
+            },
+            {
+              "line_no": 116,
+              "text": "line_cache/reconcile.py_116 = compute(116)"
+            },
+            {
+              "line_no": 117,
+              "text": "line_cache/reconcile.py_117 = compute(117)"
+            },
+            {
+              "line_no": 118,
+              "text": "line_cache/reconcile.py_118 = compute(118)"
+            },
+            {
+              "line_no": 119,
+              "text": "line_cache/reconcile.py_119 = compute(119)"
+            },
+            {
+              "line_no": 120,
+              "text": "line_cache/reconcile.py_120 = compute(120)"
+            },
+            {
+              "line_no": 121,
+              "text": "line_cache/reconcile.py_121 = compute(121)"
+            },
+            {
+              "line_no": 122,
+              "text": "line_cache/reconcile.py_122 = compute(122)"
+            },
+            {
+              "line_no": 123,
+              "text": "line_cache/reconcile.py_123 = compute(123)"
+            },
+            {
+              "line_no": 124,
+              "text": "line_cache/reconcile.py_124 = compute(124)"
+            },
+            {
+              "line_no": 125,
+              "text": "line_cache/reconcile.py_125 = compute(125)"
+            },
+            {
+              "line_no": 126,
+              "text": "line_cache/reconcile.py_126 = compute(126)"
+            },
+            {
+              "line_no": 127,
+              "text": "line_cache/reconcile.py_127 = compute(127)"
+            },
+            {
+              "line_no": 128,
+              "text": "line_cache/reconcile.py_128 = compute(128)"
+            },
+            {
+              "line_no": 129,
+              "text": "line_cache/reconcile.py_129 = compute(129)"
+            },
+            {
+              "line_no": 130,
+              "text": "line_cache/reconcile.py_130 = compute(130)"
+            },
+            {
+              "line_no": 131,
+              "text": "line_cache/reconcile.py_131 = compute(131)"
+            },
+            {
+              "line_no": 132,
+              "text": "line_cache/reconcile.py_132 = compute(132)"
+            },
+            {
+              "line_no": 133,
+              "text": "line_cache/reconcile.py_133 = compute(133)"
+            },
+            {
+              "line_no": 134,
+              "text": "line_cache/reconcile.py_134 = compute(134)"
+            },
+            {
+              "line_no": 135,
+              "text": "line_cache/reconcile.py_135 = compute(135)"
+            },
+            {
+              "line_no": 136,
+              "text": "line_cache/reconcile.py_136 = compute(136)"
+            },
+            {
+              "line_no": 137,
+              "text": "line_cache/reconcile.py_137 = compute(137)"
+            },
+            {
+              "line_no": 138,
+              "text": "line_cache/reconcile.py_138 = compute(138)"
+            },
+            {
+              "line_no": 139,
+              "text": "line_cache/reconcile.py_139 = compute(139)"
+            },
+            {
+              "line_no": 140,
+              "text": "line_cache/reconcile.py_140 = compute(140)"
+            },
+            {
+              "line_no": 141,
+              "text": "line_cache/reconcile.py_141 = compute(141)"
+            },
+            {
+              "line_no": 142,
+              "text": "line_cache/reconcile.py_142 = compute(142)"
+            },
+            {
+              "line_no": 143,
+              "text": "line_cache/reconcile.py_143 = compute(143)"
+            },
+            {
+              "line_no": 144,
+              "text": "line_cache/reconcile.py_144 = compute(144)"
+            },
+            {
+              "line_no": 145,
+              "text": "line_cache/reconcile.py_145 = compute(145)"
+            }
+          ],
+          "hunk_id": "cache/reconcile.py#2",
+          "new_lines": 43,
+          "new_start": 106,
+          "old_lines": 3,
+          "old_start": 103,
+          "path": "cache/reconcile.py",
+          "removed_count": 0
+        },
+        {
+          "added": [
+            {
+              "line_no": 153,
+              "text": "line_cache/reconcile.py_153 = compute(153)"
+            },
+            {
+              "line_no": 154,
+              "text": "line_cache/reconcile.py_154 = compute(154)"
+            },
+            {
+              "line_no": 155,
+              "text": "line_cache/reconcile.py_155 = compute(155)"
+            },
+            {
+              "line_no": 156,
+              "text": "line_cache/reconcile.py_156 = compute(156)"
+            },
+            {
+              "line_no": 157,
+              "text": "line_cache/reconcile.py_157 = compute(157)"
+            },
+            {
+              "line_no": 158,
+              "text": "line_cache/reconcile.py_158 = compute(158)"
+            },
+            {
+              "line_no": 159,
+              "text": "line_cache/reconcile.py_159 = compute(159)"
+            },
+            {
+              "line_no": 160,
+              "text": "line_cache/reconcile.py_160 = compute(160)"
+            },
+            {
+              "line_no": 161,
+              "text": "line_cache/reconcile.py_161 = compute(161)"
+            },
+            {
+              "line_no": 162,
+              "text": "line_cache/reconcile.py_162 = compute(162)"
+            }
+          ],
+          "hunk_id": "cache/reconcile.py#3",
+          "new_lines": 13,
+          "new_start": 153,
+          "old_lines": 3,
+          "old_start": 150,
+          "path": "cache/reconcile.py",
+          "removed_count": 0
+        }
+      ],
+      "patch_present": true,
+      "path": "cache/reconcile.py",
+      "status": "modified"
+    },
+    {
+      "additions": 150,
+      "deletions": 1,
+      "hunks": [
+        {
+          "added": [
+            {
+              "line_no": 12,
+              "text": "assert guard_12(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 13,
+              "text": "assert guard_13(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 14,
+              "text": "assert guard_14(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 15,
+              "text": "assert guard_15(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 16,
+              "text": "assert guard_16(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 17,
+              "text": "assert guard_17(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 18,
+              "text": "assert guard_18(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 19,
+              "text": "assert guard_19(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 20,
+              "text": "assert guard_20(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 21,
+              "text": "assert guard_21(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 22,
+              "text": "assert guard_22(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 23,
+              "text": "assert guard_23(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 24,
+              "text": "assert guard_24(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 25,
+              "text": "assert guard_25(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 26,
+              "text": "assert guard_26(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 27,
+              "text": "assert guard_27(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 28,
+              "text": "assert guard_28(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 29,
+              "text": "assert guard_29(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 30,
+              "text": "assert guard_30(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 31,
+              "text": "assert guard_31(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 32,
+              "text": "assert guard_32(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 33,
+              "text": "assert guard_33(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 34,
+              "text": "assert guard_34(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 35,
+              "text": "assert guard_35(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 36,
+              "text": "assert guard_36(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 37,
+              "text": "assert guard_37(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 38,
+              "text": "assert guard_38(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 39,
+              "text": "assert guard_39(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 40,
+              "text": "assert guard_40(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 41,
+              "text": "assert guard_41(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 42,
+              "text": "assert guard_42(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 43,
+              "text": "assert guard_43(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 44,
+              "text": "assert guard_44(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 45,
+              "text": "assert guard_45(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 46,
+              "text": "assert guard_46(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 47,
+              "text": "assert guard_47(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 48,
+              "text": "assert guard_48(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 49,
+              "text": "assert guard_49(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 50,
+              "text": "assert guard_50(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 51,
+              "text": "assert guard_51(ctx) is not None  # hand-written"
+            }
+          ],
+          "hunk_id": "provisioning/config.py#0",
+          "new_lines": 43,
+          "new_start": 12,
+          "old_lines": 3,
+          "old_start": 9,
+          "path": "provisioning/config.py",
+          "removed_count": 1
+        },
+        {
+          "added": [
+            {
+              "line_no": 59,
+              "text": "assert guard_59(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 60,
+              "text": "assert guard_60(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 61,
+              "text": "assert guard_61(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 62,
+              "text": "assert guard_62(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 63,
+              "text": "assert guard_63(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 64,
+              "text": "assert guard_64(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 65,
+              "text": "assert guard_65(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 66,
+              "text": "assert guard_66(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 67,
+              "text": "assert guard_67(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 68,
+              "text": "assert guard_68(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 69,
+              "text": "assert guard_69(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 70,
+              "text": "assert guard_70(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 71,
+              "text": "assert guard_71(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 72,
+              "text": "assert guard_72(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 73,
+              "text": "assert guard_73(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 74,
+              "text": "assert guard_74(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 75,
+              "text": "assert guard_75(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 76,
+              "text": "assert guard_76(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 77,
+              "text": "assert guard_77(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 78,
+              "text": "assert guard_78(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 79,
+              "text": "assert guard_79(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 80,
+              "text": "assert guard_80(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 81,
+              "text": "assert guard_81(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 82,
+              "text": "assert guard_82(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 83,
+              "text": "assert guard_83(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 84,
+              "text": "assert guard_84(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 85,
+              "text": "assert guard_85(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 86,
+              "text": "assert guard_86(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 87,
+              "text": "assert guard_87(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 88,
+              "text": "assert guard_88(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 89,
+              "text": "assert guard_89(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 90,
+              "text": "assert guard_90(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 91,
+              "text": "assert guard_91(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 92,
+              "text": "assert guard_92(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 93,
+              "text": "assert guard_93(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 94,
+              "text": "assert guard_94(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 95,
+              "text": "assert guard_95(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 96,
+              "text": "assert guard_96(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 97,
+              "text": "assert guard_97(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 98,
+              "text": "assert guard_98(ctx) is not None  # hand-written"
+            }
+          ],
+          "hunk_id": "provisioning/config.py#1",
+          "new_lines": 43,
+          "new_start": 59,
+          "old_lines": 3,
+          "old_start": 56,
+          "path": "provisioning/config.py",
+          "removed_count": 0
+        },
+        {
+          "added": [
+            {
+              "line_no": 106,
+              "text": "assert guard_106(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 107,
+              "text": "assert guard_107(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 108,
+              "text": "assert guard_108(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 109,
+              "text": "assert guard_109(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 110,
+              "text": "assert guard_110(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 111,
+              "text": "assert guard_111(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 112,
+              "text": "assert guard_112(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 113,
+              "text": "assert guard_113(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 114,
+              "text": "assert guard_114(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 115,
+              "text": "assert guard_115(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 116,
+              "text": "assert guard_116(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 117,
+              "text": "assert guard_117(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 118,
+              "text": "assert guard_118(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 119,
+              "text": "assert guard_119(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 120,
+              "text": "assert guard_120(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 121,
+              "text": "assert guard_121(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 122,
+              "text": "assert guard_122(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 123,
+              "text": "assert guard_123(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 124,
+              "text": "assert guard_124(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 125,
+              "text": "assert guard_125(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 126,
+              "text": "assert guard_126(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 127,
+              "text": "assert guard_127(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 128,
+              "text": "assert guard_128(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 129,
+              "text": "assert guard_129(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 130,
+              "text": "assert guard_130(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 131,
+              "text": "assert guard_131(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 132,
+              "text": "assert guard_132(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 133,
+              "text": "assert guard_133(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 134,
+              "text": "assert guard_134(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 135,
+              "text": "assert guard_135(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 136,
+              "text": "assert guard_136(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 137,
+              "text": "assert guard_137(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 138,
+              "text": "assert guard_138(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 139,
+              "text": "assert guard_139(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 140,
+              "text": "assert guard_140(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 141,
+              "text": "assert guard_141(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 142,
+              "text": "assert guard_142(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 143,
+              "text": "assert guard_143(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 144,
+              "text": "assert guard_144(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 145,
+              "text": "assert guard_145(ctx) is not None  # hand-written"
+            }
+          ],
+          "hunk_id": "provisioning/config.py#2",
+          "new_lines": 43,
+          "new_start": 106,
+          "old_lines": 3,
+          "old_start": 103,
+          "path": "provisioning/config.py",
+          "removed_count": 0
+        },
+        {
+          "added": [
+            {
+              "line_no": 153,
+              "text": "assert guard_153(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 154,
+              "text": "assert guard_154(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 155,
+              "text": "assert guard_155(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 156,
+              "text": "assert guard_156(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 157,
+              "text": "assert guard_157(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 158,
+              "text": "assert guard_158(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 159,
+              "text": "assert guard_159(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 160,
+              "text": "assert guard_160(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 161,
+              "text": "assert guard_161(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 162,
+              "text": "assert guard_162(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 163,
+              "text": "assert guard_163(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 164,
+              "text": "assert guard_164(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 165,
+              "text": "assert guard_165(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 166,
+              "text": "assert guard_166(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 167,
+              "text": "assert guard_167(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 168,
+              "text": "assert guard_168(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 169,
+              "text": "assert guard_169(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 170,
+              "text": "assert guard_170(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 171,
+              "text": "assert guard_171(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 172,
+              "text": "assert guard_172(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 173,
+              "text": "assert guard_173(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 174,
+              "text": "assert guard_174(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 175,
+              "text": "assert guard_175(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 176,
+              "text": "assert guard_176(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 177,
+              "text": "assert guard_177(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 178,
+              "text": "assert guard_178(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 179,
+              "text": "assert guard_179(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 180,
+              "text": "assert guard_180(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 181,
+              "text": "assert guard_181(ctx) is not None  # hand-written"
+            },
+            {
+              "line_no": 182,
+              "text": "assert guard_182(ctx) is not None  # hand-written"
+            }
+          ],
+          "hunk_id": "provisioning/config.py#3",
+          "new_lines": 33,
+          "new_start": 153,
+          "old_lines": 3,
+          "old_start": 150,
+          "path": "provisioning/config.py",
+          "removed_count": 0
+        }
+      ],
+      "patch_present": true,
+      "path": "provisioning/config.py",
+      "status": "modified"
+    }
+  ],
+  "head_ref": "feature/held",
+  "head_sha": "4471a91f3c1d4e5f6a7b8c9d0e1f2a3b4c5d6e7f",
+  "labels": [],
+  "linked_issue": {
+    "body": "Provisioning sync retries drop entitlements.\n\nRetries must not drop an entitlement that was already granted.\nScope: provisioning/**\n",
+    "number": 114,
+    "scope_paths": [
+      "provisioning/**"
+    ],
+    "title": "Provisioning sync retries drop entitlements",
+    "url": "https://github.com/acme/provisioning-service/issues/114"
+  },
+  "merged": false,
+  "pr_number": 4471,
+  "provenance": "simulated",
+  "repo": "acme/provisioning-service",
+  "review_comments": [],
+  "review_requests": [
+    {
+      "requested_at": "2026-09-16T09:55:00Z",
+      "reviewer": "rdolan"
+    },
+    {
+      "requested_at": "2026-09-16T09:55:00Z",
+      "reviewer": "mkeane"
+    }
+  ],
+  "reviews": [
+    {
+      "commit_id": "4471a91f3c1d4e5f6a7b8c9d0e1f2a3b4c5d6e7f",
+      "reviewer": "rdolan",
+      "state": "APPROVED",
+      "submitted_at": "2026-09-16T09:56:52Z"
+    },
+    {
+      "commit_id": "4471a91f3c1d4e5f6a7b8c9d0e1f2a3b4c5d6e7f",
+      "reviewer": "mkeane",
+      "state": "APPROVED",
+      "submitted_at": "2026-09-16T09:56:49Z"
+    }
+  ],
+  "title": "Rework provisioning sync and entitlement grants",
+  "url": "https://github.com/acme/provisioning-service/pull/4471"
+}

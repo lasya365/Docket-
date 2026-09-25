@@ -1,0 +1,5 @@
+# The Docket hook is a shell script. Git's core.autocrlf on Windows would rewrite it
+# with CRLF line endings, and bash would then look for an interpreter called `bash\r`
+# and fail. Pin it to LF wherever this repo is cloned.
+*.sh text eol=lf
+prepare-commit-msg text eol=lf

@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light only">
+<title>Docket — Freshservice Change Management</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#FFFFFF;--bg:#F4F6F8;--panel:#F3F6F6;--panel-2:#EAF1F0;
+  --line:#DDE4E3;--line-2:#C2CFCD;
+  --ink:#122A2B;--ink-2:#3E5455;--muted:#6E8384;
+  --nav:#12292B;--nav-2:#1B3B3D;--nav-txt:#9FB8B9;
+  --pass:#0B7A57;--warn:#9C5B00;--fail:#B72D48;--accent:#0E8E85;
+  --fs-orange:#FF5E3A;
+  --ui:"Inter",system-ui,sans-serif;--mono:"JetBrains Mono",ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:var(--ui);font-size:14px}
+.shell{display:grid;grid-template-columns:190px 1fr;min-height:100vh}
+.nav{background:var(--nav);color:var(--nav-txt);padding:14px 0;position:sticky;top:0;height:100vh;overflow:auto}
+.logo{color:#fff;font-weight:700;font-size:15px;padding:0 16px 18px;letter-spacing:-.2px}
+.logo span{color:#4FD8CC}
+.nav a{display:flex;align-items:center;gap:10px;padding:9px 16px;color:var(--nav-txt);font-size:13px;cursor:pointer}
+.nav a.on{background:var(--nav-2);color:#fff;box-shadow:inset 3px 0 0 #4FD8CC}
+.nav a:hover{background:var(--nav-2)}
+.nav .grp{font-size:10px;letter-spacing:.12em;color:#628485;padding:16px 16px 6px;font-weight:600}
+.dot{width:16px;text-align:center;opacity:.85;font-size:13px}
+.top{background:var(--paper);border-bottom:1px solid var(--line);padding:10px 20px;
+  display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:15;flex-wrap:wrap}
+.newbtn{background:var(--accent);color:#fff;border:none;border-radius:4px;font-size:12.5px;font-weight:600;
+  padding:8px 13px;cursor:pointer;white-space:nowrap}
+.srch{flex:1;min-width:120px;max-width:320px;background:var(--panel);border:1px solid var(--line);
+  border-radius:4px;padding:7px 11px;font-size:12.5px;color:var(--muted)}
+.icnbtn{width:32px;height:32px;border-radius:5px;display:grid;place-items:center;color:var(--muted);
+  font-size:14px;cursor:pointer;border:1px solid transparent}
+.icnbtn:hover{background:var(--panel);border-color:var(--line)}
+.icnbtn.bell{position:relative}
+.icnbtn.bell:after{content:"";position:absolute;top:6px;right:7px;width:6px;height:6px;border-radius:50%;background:var(--fail);border:1.5px solid #fff}
+.wsname{font-size:12px;color:var(--ink-2);font-weight:600}
+.tog{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:10.5px;font-weight:700;
+  letter-spacing:.08em;color:var(--muted);cursor:pointer;user-select:none;border:1px solid var(--line);
+  padding:6px 10px;border-radius:4px;background:var(--paper)}
+.tog .sw{width:30px;height:17px;border-radius:9px;background:var(--line-2);position:relative;transition:background .2s}
+.tog .sw:after{content:"";position:absolute;top:2px;left:2px;width:13px;height:13px;border-radius:50%;
+  background:#fff;transition:transform .2s}
+.tog.on{color:var(--accent);border-color:var(--accent)}
+.tog.on .sw{background:var(--accent)}
+.tog.on .sw:after{transform:translateX(13px)}
+.av{width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;
+  display:grid;place-items:center;font-size:11px;font-weight:700}
+.main{min-width:0}
+.body{padding:20px}
+.offbar{background:#FBF3E8;border:1px solid var(--warn);color:var(--warn);border-radius:4px;
+  padding:11px 14px;font-size:13px;margin-bottom:16px;line-height:1.55}
+.head{display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+h1{font-size:20px;font-weight:600;margin:0;letter-spacing:-.2px}
+.view{font-size:12.5px;color:var(--muted);border:1px solid var(--line);border-radius:4px;
+  padding:6px 10px;background:var(--paper);cursor:pointer}
+.tbl{background:var(--paper);border:1px solid var(--line);border-radius:5px;overflow:hidden}
+.th,.tr{display:grid;grid-template-columns:1fr 130px 96px 108px;gap:12px;padding:12px 16px;align-items:center}
+.th{background:var(--panel-2);font-size:10.5px;font-weight:700;letter-spacing:.09em;color:var(--muted);
+  text-transform:uppercase;border-bottom:1px solid var(--line)}
+.tr{border-bottom:1px solid var(--line);cursor:pointer}
+.tr:last-child{border-bottom:none}
+.tr:hover{background:var(--panel)}
+.tr .sub{font-size:14px;font-weight:600}
+.tr .id{font-family:var(--mono);font-size:10.5px;color:var(--muted);margin-bottom:3px;letter-spacing:.06em}
+.tr .meta{font-family:var(--mono);font-size:10.5px;color:var(--muted);margin-top:4px}
+.tr.flag{background:#FDF8F9}.tr.flag:hover{background:#FBF1F3}
+.dt{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.chip{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.07em;padding:3px 7px;
+  border-radius:3px;display:inline-block;white-space:nowrap}
+.c-open{background:#E4F5F3;color:var(--accent)}
+.c-await{background:#FBF3E8;color:var(--warn)}
+.c-low{background:#E9F4F0;color:var(--pass)}
+.c-med{background:#FBF3E8;color:var(--warn)}
+.c-high{background:#FBEDF0;color:var(--fail)}
+.c-new{background:#FBEDF0;color:var(--fail);border:1px dashed var(--fail)}
+.callout{margin-top:14px;border:1px dashed var(--fail);background:#FDF8F9;border-radius:4px;
+  padding:13px 15px;font-size:13px;color:var(--fail);line-height:1.6}
+.hint{font-family:var(--mono);font-size:11.5px;color:var(--muted);margin-top:14px;line-height:1.7}
+.crumb{font-size:12px;color:var(--muted);margin-bottom:10px}
+.crumb b{color:var(--accent);cursor:pointer;font-weight:500}
+.backbtn{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;color:var(--ink-2);
+  background:var(--paper);border:1px solid var(--line-2);border-radius:4px;padding:7px 12px;cursor:pointer;
+  margin-bottom:14px}
+.backbtn:hover{background:var(--panel);border-color:var(--accent);color:var(--accent)}
+.backbtn svg{width:13px;height:13px}
+.dhead{display:flex;align-items:flex-start;gap:14px;flex-wrap:wrap;margin-bottom:16px}
+.dhead h1{font-size:21px}
+.cid{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.08em}
+.dbtn{margin-left:auto;display:flex;gap:8px}
+.dbtn button{font-size:12.5px;font-weight:600;padding:8px 14px;border-radius:4px;border:1px solid var(--line-2);
+  background:var(--paper);color:var(--ink-2);cursor:pointer}
+.dbtn button.pri{background:var(--accent);border-color:var(--accent);color:#fff}
+.life{display:flex;background:var(--paper);border:1px solid var(--line);border-radius:5px;
+  overflow:auto;margin-bottom:16px;scrollbar-width:none}
+.life::-webkit-scrollbar{display:none}
+.life div{padding:11px 16px;font-size:11.5px;color:var(--muted);white-space:nowrap;position:relative;font-weight:500}
+.life div+div:before{content:"";position:absolute;left:0;top:9px;bottom:9px;width:1px;background:var(--line)}
+.life div.done{color:var(--pass)}
+.life div.on{color:#fff;background:var(--accent);font-weight:600}
+.cols{display:grid;grid-template-columns:1fr 264px;gap:16px;align-items:start}
+@media(max-width:860px){.cols{grid-template-columns:1fr}.shell{grid-template-columns:1fr}.nav{display:none}}
+.tabs{display:flex;border-bottom:1px solid var(--line);background:var(--paper);
+  border-radius:5px 5px 0 0;overflow:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tabs button{font-family:var(--ui);font-size:13px;font-weight:600;padding:12px 15px;border:none;
+  background:none;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap}
+.tabs button.on{color:var(--accent);border-bottom-color:var(--accent)}
+.tabs button .n{display:inline-block;margin-left:6px;background:var(--fail);color:#fff;font-family:var(--mono);
+  font-size:9px;font-weight:700;padding:2px 5px;border-radius:8px;vertical-align:1px}
+.tabs button .n.g{background:var(--pass)}
+.tabbody{background:var(--paper);border:1px solid var(--line);border-top:none;border-radius:0 0 5px 5px;padding:18px}
+.fld{margin-bottom:18px}
+.fld label{display:block;font-size:11px;font-weight:700;letter-spacing:.07em;color:var(--muted);
+  text-transform:uppercase;margin-bottom:6px}
+.fld .box{border:1px solid var(--line);border-radius:4px;padding:12px 14px;font-size:13.5px;
+  line-height:1.65;color:var(--ink-2);background:var(--paper)}
+.fld .box.bad{border-color:var(--fail);background:#FDF8F9;color:var(--fail)}
+.fld .box.fixed{border-color:var(--pass);background:#F2F9F6;color:var(--ink-2)}
+.wrong{font-family:var(--mono);font-size:10.5px;color:var(--fail);margin:6px 0 0;line-height:1.6}
+.right{font-family:var(--mono);font-size:10.5px;color:var(--pass);margin:6px 0 0;line-height:1.6}
+.props{background:var(--paper);border:1px solid var(--line);border-radius:5px;padding:14px 16px;margin-bottom:16px}
+.props h3{font-size:11px;font-weight:700;letter-spacing:.09em;color:var(--muted);text-transform:uppercase;margin:0 0 12px}
+.props .p{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);
+  font-size:12.5px;align-items:center}
+.props .p:last-child{border-bottom:none}
+.props .k{color:var(--muted)}
+.props .v{color:var(--ink);font-weight:500;text-align:right}
+.props .v.hi{color:var(--fail);font-weight:700}
+/* threshold */
+.thr{background:var(--paper);border:1px solid var(--accent);border-radius:5px;padding:14px 16px}
+.thr h3{font-size:11px;font-weight:700;letter-spacing:.09em;color:var(--accent);text-transform:uppercase;margin:0 0 4px}
+.thr .sub2{font-size:11.5px;color:var(--muted);line-height:1.5;margin-bottom:12px}
+.thr input[type=range]{width:100%;accent-color:var(--accent)}
+.thr .rowv{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11.5px;
+  color:var(--muted);margin-top:8px}
+.thr .rowv b{color:var(--accent)}
+.thr .out{margin-top:10px;font-family:var(--mono);font-size:11px;font-weight:700;padding:8px 10px;
+  border-radius:3px;text-align:center;letter-spacing:.06em}
+.out.board{background:#FBEDF0;color:var(--fail)}
+.out.auto{background:#E9F4F0;color:var(--pass)}
+/* hooks */
+.srcbar{display:flex;align-items:center;gap:10px;margin-bottom:14px;font-family:var(--mono);font-size:11px;color:var(--muted)}
+.srcbar .track{flex:1;height:5px;border-radius:3px;background:var(--panel-2);overflow:hidden}
+.srcbar .fill{height:100%;background:linear-gradient(90deg,var(--accent),#4FD8CC);border-radius:3px;
+  transition:width .5s ease;width:0%}
+.hk{display:grid;grid-template-columns:26px 82px 1fr auto;gap:12px;align-items:center;padding:10px 0;
+  border-bottom:1px solid var(--line);font-family:var(--mono);font-size:12px;cursor:pointer}
+.hk:hover{background:var(--panel)}
+.hk .ic{width:24px;height:24px;border-radius:5px;display:grid;place-items:center;font-family:var(--ui);
+  font-size:9.5px;font-weight:700;color:#fff;letter-spacing:.02em}
+.hk.pending .ic{background:var(--line-2)!important;color:var(--line-2)}
+.hk .l{font-weight:700;color:var(--accent);font-size:10.5px;letter-spacing:.07em}
+.hk .v{color:var(--ink-2)}
+.hk .s{font-size:9px;font-weight:700;letter-spacing:.07em;padding:3px 7px;border-radius:3px}
+.hk.pending .v{opacity:.35}
+.hk.miss .v{color:var(--fail)}
+.s.wait{background:var(--panel-2);color:var(--muted)}
+.s.got{background:#E9F4F0;color:var(--pass)}
+.s.none{background:#FBEDF0;color:var(--fail)}
+.exp{background:var(--panel);border-left:2px solid var(--accent);padding:11px 14px;
+  font-family:var(--mono);font-size:11px;color:var(--ink-2);line-height:1.85;white-space:pre-wrap}
+.sec-t{font-size:11px;font-weight:700;letter-spacing:.09em;color:var(--muted);text-transform:uppercase;
+  margin:22px 0 10px;padding-top:16px;border-top:1px solid var(--line)}
+.sec-t.first{margin-top:0;padding-top:0;border-top:none}
+.chk{font-family:var(--mono);font-size:12.5px;line-height:2.05;color:var(--pass);margin:0}
+.sig{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;padding:11px 0;
+  border-bottom:1px solid var(--line);cursor:pointer}
+.sig:hover{background:var(--panel)}
+.sig .n{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--fail);letter-spacing:.06em}
+.sig .d{font-size:12.5px;color:var(--ink-2);margin-top:3px}
+.sig .val{font-family:var(--mono);font-size:17px;font-weight:700;color:var(--fail);white-space:nowrap}
+.verdict{border:1.5px solid var(--fail);border-radius:5px;background:#FDF8F9;padding:20px;margin:16px 0}
+.verdict.ok{border-color:var(--pass);background:#F2F9F6}
+.vtop{display:flex;align-items:center;gap:18px;justify-content:center;text-align:left}
+.gauge circle:last-child{transition:stroke-dashoffset 1.1s cubic-bezier(.2,.8,.2,1)}
+.verdict .w{font-size:26px;font-weight:700;color:var(--fail);letter-spacing:-.5px;margin:0}
+.verdict.ok .w{color:var(--pass)}
+.verdict p{font-size:13.5px;color:var(--ink-2);margin:6px 0 0;line-height:1.6}
+.verdict .sc{font-family:var(--mono);font-size:11.5px;color:var(--muted);margin-top:10px;text-align:center}
+.acts{display:flex;gap:9px;flex-wrap:wrap;margin-top:14px}
+.acts button{font-size:12.5px;font-weight:600;padding:10px 15px;border-radius:4px;cursor:pointer;
+  border:1px solid var(--line-2);background:var(--paper);color:var(--ink-2)}
+.acts button.pri{background:var(--fail);border-color:var(--fail);color:#fff}
+.acts button.g{background:var(--pass);border-color:var(--pass);color:#fff}
+.diff{font-family:var(--mono);font-size:11.5px;line-height:1.85;overflow-x:auto;border:1px solid var(--line);
+  border-radius:4px;margin-top:10px}
+.diff div{padding:2px 12px;white-space:pre}
+.diff .h{color:var(--ink-2)}
+.diff .a{background:rgba(14,142,133,.08)}
+.diff .u{background:rgba(183,45,72,.1);color:var(--fail);font-weight:500}
+.legend{display:flex;gap:14px;flex-wrap:wrap;padding:10px 12px;background:var(--panel);
+  border-top:1px solid var(--line);font-family:var(--mono);font-size:10px;color:var(--muted)}
+.legend i{font-style:normal;display:inline-block;width:9px;height:9px;border-radius:2px;vertical-align:-1px;margin-right:5px}
+.note2{font-size:13.5px;color:var(--ink-2);line-height:1.65;margin:12px 0 0}
+.note2 b{color:var(--ink)}
+.appr{border:1px solid var(--line);border-radius:4px;padding:14px;margin-bottom:10px}
+.appr .g{font-size:13.5px;font-weight:600}
+.appr .m{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:5px}
+.act{display:grid;grid-template-columns:92px 1fr;gap:14px;padding:9px 0;border-bottom:1px solid var(--line);
+  font-size:12.5px;color:var(--ink-2)}
+.act:last-child{border-bottom:none}
+.act .t{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.act b{color:var(--ink)}
+.act.dk b{color:var(--accent)}
+/* replay */
+.rep{display:grid;grid-template-columns:repeat(10,1fr);gap:4px;margin:12px 0}
+.rep i{height:20px;border-radius:2px;background:var(--panel-2);display:block}
+.rep i.p{background:#B7E0CE}.rep i.c{background:#F2D5A8}.rep i.r{background:#E9A6B4}
+.replg{font-family:var(--mono);font-size:10.5px;color:var(--muted);display:flex;gap:14px;flex-wrap:wrap}
+.foot{padding:14px 20px;color:var(--muted);font-family:var(--mono);font-size:10.5px}
+.foot span{color:var(--accent);cursor:pointer}
+</style>
+</head>
+<body>
+<div class="shell">
+  <nav class="nav">
+    <div class="logo">fresh<span>service</span></div>
+    <div class="grp">SERVICE DESK</div>
+    <a><span class="dot">▤</span>Tickets</a><a><span class="dot">◈</span>Problems</a>
+    <a class="on"><span class="dot">⇄</span>Changes</a><a><span class="dot">▲</span>Releases</a>
+    <div class="grp">ASSETS</div>
+    <a><span class="dot">▣</span>Inventory</a><a><span class="dot">◎</span>Contracts</a>
+    <div class="grp">AI &amp; AUTOMATION</div>
+    <a><span class="dot">⚙</span>Workflow automator</a><a><span class="dot">◆</span>Agent studio</a>
+    <div class="grp">ANALYTICS</div>
+    <a><span class="dot">◔</span>Reports</a>
+  </nav>
+  <div class="main">
+    <div class="top">
+      <button class="newbtn">+ New change</button>
+      <div class="srch">Search changes, assets, tickets…</div>
+      <div class="tog on" id="tog" onclick="toggleDocket()"><span class="sw"></span><span id="togl">DOCKET ON</span></div>
+      <span class="wsname">IT Workspace</span>
+      <div class="icnbtn">?</div>
+      <div class="icnbtn bell">🔔</div>
+      <div class="av">CM</div>
+    </div>
+    <div class="body" id="body"></div>
+    <div class="foot">Docket for Freshservice — concept preview · deterministic sample data · <span onclick="reset()">restart</span></div>
+  </div>
+</div>
+
+<script>
+/* ============ DATA ============ */
+var CH={
+ '2208':{id:'CHG-2208',sub:'Entitlement sync — retry and backoff',
+   meta:'812 lines · AI-authored · CI green · 2 approvals',
+   status:'Awaiting Approval',stage:2,risk:'Low',score:78,date:'21 Aug 02:00',type:'Standard',
+   filed:false,hasDiff:true,
+   hooks:[
+    {l:'INTENT',v:'REQ-114 · "retry entitlement sync on 429"',d:400,
+     x:'JIRA REQ-114\n  "Entitlement sync fails under rate limiting.\n   Add retry with exponential backoff on HTTP 429."\n  scope: provisioning pipeline\n  no mention of: cache, reconcile, role grants'},
+    {l:'SESSION',v:'claude-code · 6 retries · 11 files touched',d:1600,
+     x:'agent      claude-code\nmodel      4.2\nprompt     r91\nturns      14\nretries    6\nfiles      11 touched · 3 reverted\ntools      read, edit, bash, test'},
+    {l:'DIFF',v:'PR #4471 · 812 lines · 604 AI-authored',d:900,
+     x:'PR #4471  feat: entitlement sync retry\n  +812  −44\n  604 lines AI-authored (74%)\n  208 lines human-authored\n  340 AI lines with no requirement trace'},
+    {l:'REVIEW',v:'2 approvals · 3m 41s total time',d:2200,
+     x:'R. Iyer     opened PR 14:02 → approved 14:04  (1m 52s)\nD. Menon    approved 14:06                    (1m 49s)\ncomments    0\nfiles opened in review  2 of 11'},
+    {l:'VERIFY',v:'CI green · 214 tests · coverage 87%',d:1250,
+     x:'CI         pass · 214 tests\ncoverage   87% file average\n           31% on AI-authored lines\nnew tests  0 covering the 340 unattributed lines'},
+    {l:'DEPLOY',v:'staging → prod · window 21 Aug 02:00',d:2700,
+     x:'target     production\nwindow     21 Aug 02:00 – 03:00\ncanary     10% for 20 min\nrollback   revert commit a91f3c'}],
+   sigs:[
+    {n:'UNATTRIBUTED CHANGE',d:'Generated lines tracing to no requirement',v:'340 / 812',
+     x:'340 of 604 AI-authored lines map to no line of REQ-114.\nLargest cluster: entitlement_svc calls (61 lines).\nThe requirement named retry and backoff only.'},
+    {n:'REVIEW DEPTH',d:'812 lines approved in 3m 41s — 3.7 lines/sec',v:'3m 41s',
+     x:'Team median for a PR this size: 41 minutes.\n2 of 11 files were opened during review.\nThe file containing the entitlement writes was not one of them.'},
+    {n:'UNTESTED GENERATION',d:'Coverage on AI-authored lines only',v:'31%',
+     x:'File-average coverage of 87% hides the gap.\nOf the 340 unattributed lines, 0 are covered by a test.\nNo test was added in this PR.'},
+    {n:'BLAST RADIUS',d:'Touches entitlement service — not named in REQ-114',v:'2 svc',
+     x:'provisioning-svc   expected, named in REQ-114\nentitlement-svc    NOT named — write access\nstated change impact: "provisioning pipeline only"'}],
+   checks:['CI green · 214 tests passing','Approved by 2 reviewers','Coverage 87% — file average','No policy violations flagged'],
+   reason:'Entitlement sync fails under rate limiting during peak provisioning. REQ-114 asks for retry with exponential backoff on HTTP 429.',
+   impact:'Provisioning pipeline only. No user-facing surface expected.',
+   rollout:'Deploy during weekly maintenance window. Canary at 10% for 20 minutes, then full.',
+   backoutBad:'Revert commit a91f3c.',
+   backoutWhy:'this does not restore the agent. Reverting the commit leaves the model version, prompt revision, tool scope and grounding knowledge exactly where they are.',
+   backoutFix:'Revert agent bundle <b>v14 → v13</b> — model 4.2→4.1, prompt r91→r88, tools −entitlement.grant, knowledge kb-2211→prior. Commit revert a91f3c included.'},
+
+ '2209':{id:'CHG-2209',sub:'Nightly report scheduler window',
+   meta:'31 lines · human-authored · CI green',
+   status:'Planning',stage:1,risk:'Low',score:12,date:'22 Aug 01:00',type:'Minor',
+   filed:false,hasDiff:false,
+   hooks:[
+    {l:'INTENT',v:'REQ-121 · "move nightly report to 03:00"',d:350,x:'JIRA REQ-121\n  Shift the nightly report job one hour later\n  to clear the backup window.'},
+    {l:'SESSION',v:'no agent involved',d:800,x:'No agent session.\nAuthored entirely by a human.'},
+    {l:'DIFF',v:'PR #4468 · 31 lines · 0 AI-authored',d:600,x:'PR #4468\n  +31 −6\n  0 AI-authored lines\n  0 unattributed lines'},
+    {l:'REVIEW',v:'1 approval · 22m',d:1400,x:'A. Rao   reviewed 22m · 3 comments\nall files opened'},
+    {l:'VERIFY',v:'CI green · coverage 91%',d:1000,x:'CI pass\ncoverage 91% · unchanged lines fully covered'},
+    {l:'DEPLOY',v:'scheduled job config',d:1800,x:'target production\nrollback revert commit — correct here, no agent involved'}],
+   sigs:[],
+   checks:['CI green · 96 tests passing','Approved by 1 reviewer','Coverage 91%','No policy violations flagged'],
+   reason:'Nightly report overlaps the backup window and occasionally fails.',
+   impact:'Reporting only.',
+   rollout:'Config change applied at next scheduler restart.',
+   backoutBad:'Revert commit 77c1de.',
+   backoutWhy:'',
+   backoutFix:''},
+
+ '2210':{id:'CHG-2210',sub:'Resolution agent — model version 4.1 → 4.2',
+   meta:'no diff · behaviour change across every workflow',
+   status:'Awaiting Approval',stage:2,risk:'High',score:91,date:'20 Aug 23:00',type:'Standard',
+   filed:true,hasDiff:false,replay:true,
+   hooks:[
+    {l:'INTENT',v:'none — no requirement exists',d:400,miss:true,
+     x:'No Jira issue.\nNo PRD.\nVendor released 4.2; the platform auto-upgraded.'},
+    {l:'SESSION',v:'model registry · 4.1 → 4.2',d:900,
+     x:'agent      resolution-agent\nmodel      4.1 → 4.2\nprompt     unchanged (r88)\ntools      unchanged\nknowledge  unchanged'},
+    {l:'DIFF',v:'none — nothing to review',d:1400,miss:true,
+     x:'No code diff exists.\nThere is nothing for a board to read.\nThis is why the change files no record today.'},
+    {l:'REVIEW',v:'none — no reviewer, no approval',d:1900,miss:true,
+     x:'No pull request.\nNo reviewer.\nNo approval was requested by anyone.'},
+    {l:'VERIFY',v:'rehearsed · 50 past incidents replayed',d:2500,
+     x:'50 resolved incidents replayed against 4.2\n  44 identical outcome\n   4 changed, acceptable\n   2 REGRESSED — wrong root cause stated'},
+    {l:'DEPLOY',v:'already live across 3 workflows',d:3000,miss:true,
+     x:'Rolled to production on vendor release.\nNo maintenance window.\nNo rollback plan on file.'}],
+   sigs:[
+    {n:'NO REVIEWABLE ARTIFACT',d:'A behaviour change with no diff a human can read',v:'0 lines',
+     x:'The board is being asked to approve a change\nwith nothing to look at.\nThis is the core ADLC problem.'},
+    {n:'BEHAVIOURAL REGRESSION',d:'Rehearsed against 50 resolved incidents',v:'2 / 50',
+     x:'INC-4102  4.1 said: entitlement revoked by transfer  ✓\n          4.2 said: account lockout                  ✗\nINC-4188  4.1 said: VPN cert expired                ✓\n          4.2 said: network outage                   ✗'},
+    {n:'BLAST RADIUS',d:'Every workflow using this agent, at once',v:'3 flows',
+     x:'incident triage\nentitlement provisioning\nknowledge retrieval\nNo canary is possible — the model is shared.'},
+    {n:'NO ROLLBACK PLAN',d:'Nothing on file to revert to',v:'missing',
+     x:'ITIL requires a backout plan.\nNone exists because nobody filed the change.\nDocket writes one: revert agent bundle v9 → v8.'}],
+   checks:[],
+   reason:'Vendor released model 4.2. Platform auto-upgraded on release.',
+   impact:'Unassessed — no change record existed until Docket filed one.',
+   rollout:'Already rolled out. No window was used.',
+   backoutBad:'— empty —',
+   backoutWhy:'no backout plan exists because no change record existed. ITIL requires one.',
+   backoutFix:'Revert agent bundle <b>v9 → v8</b> — model 4.2→4.1. Prompt, tools and knowledge unchanged and pinned.'},
+
+ '2211':{id:'CHG-2211',sub:'Knowledge article rewrite — VPN troubleshooting',
+   meta:'edited by support · changes what 3 agents retrieve',
+   status:'Awaiting Approval',stage:2,risk:'High',score:64,date:'20 Aug 18:40',type:'Standard',
+   filed:true,hasDiff:false,
+   hooks:[
+    {l:'INTENT',v:'INC-4390 · "VPN steps are out of date"',d:400,
+     x:'Support ticket asked for the article to be refreshed.\nNo change request was raised.'},
+    {l:'SESSION',v:'edited by support agent · no agent involved',d:900,
+     x:'kb-2211 revision 7 → 8\nedited by  M. Fernandes (support)\npublished  immediately'},
+    {l:'DIFF',v:'article revision 7 → 8 · 3 sections rewritten',d:1300,
+     x:'Section "Certificate errors" rewritten.\nStep order changed.\nA workaround was removed.'},
+    {l:'REVIEW',v:'none — published directly',d:1800,miss:true,
+     x:'No reviewer.\nNo approval.\nKB edits do not enter change management today.'},
+    {l:'VERIFY',v:'3 agents retrieve this article',d:2300,
+     x:'resolution-agent      retrieves for VPN incidents\nonboarding-agent      retrieves for setup\nself-service portal   surfaces to employees'},
+    {l:'DEPLOY',v:'live on publish · no window',d:2700,miss:true,
+     x:'Live the moment Save was clicked.\nNo staging. No rollback.'}],
+   sigs:[
+    {n:'UNREVIEWED PUBLISH',d:'Production agent behaviour changed with no approval',v:'0 reviewers',
+     x:'A support agent changed what three production agents say,\nwith the same permissions used to fix a typo.'},
+    {n:'RETRIEVAL IMPACT',d:'Agents grounding answers on this article',v:'3 agents',
+     x:'Every VPN incident resolved after 18:40 used revision 8.'},
+    {n:'CONTRADICTS',d:'Conflicts with another approved article',v:'kb-1180',
+     x:'kb-1180 (approved, unchanged) still describes the removed workaround.\nAgents can now retrieve either.'},
+    {n:'NO ROLLBACK PLAN',d:'Nothing on file to revert to',v:'missing',
+     x:'Docket writes one: revert kb-2211 revision 8 → 7.'}],
+   checks:[],
+   reason:'VPN troubleshooting steps were reported as out of date on INC-4390.',
+   impact:'Unassessed — knowledge edits do not enter change management today.',
+   rollout:'Published immediately on save.',
+   backoutBad:'— empty —',
+   backoutWhy:'knowledge edits carry no backout plan because they never become changes.',
+   backoutFix:'Revert <b>kb-2211 revision 8 → 7</b>, and re-review kb-1180 for the contradiction it now creates.'},
+
+ '2212':{id:'CHG-2212',sub:'Support agent — refund tool granted',
+   meta:'no code change · agent gained refund-write scope',
+   status:'Awaiting Approval',stage:2,risk:'High',score:83,date:'22 Aug 09:00',type:'Standard',
+   filed:true,hasDiff:false,
+   hooks:[
+    {l:'INTENT',v:'INC-4502 · "reduce refund ticket backlog"',d:400,
+     x:'Support ticket asked to cut agent handoffs for small refunds.\nNo change request was raised — treated as a console setting.'},
+    {l:'SESSION',v:'admin console · tool added by support lead',d:900,
+     x:'agent      support-agent\ntool added stripe.refund (write scope)\nadded by   K. Wallace (support lead)\napproval   none required in admin console'},
+    {l:'DIFF',v:'none — permission toggle, not code',d:1300,miss:true,
+     x:'No PR. No diff.\nTool-scope changes are a checkbox in the agent admin console,\nnot a reviewable artifact.'},
+    {l:'REVIEW',v:'none — single admin, no second approver',d:1800,miss:true,
+     x:'Any support lead can grant a tool scope.\nNo second approval is required for write-access tools.'},
+    {l:'VERIFY',v:'no test suite for autonomous refunds',d:2300,miss:true,
+     x:'No test suite exists for what the agent will refund and under what conditions.\nManual spot-check: 3 sample tickets, none adversarial.'},
+    {l:'DEPLOY',v:'live immediately · no window',d:2700,miss:true,
+     x:'target     production\nscope      refunds up to $50, self-serve\nrollback   none on file'}],
+   sigs:[
+    {n:'CAPABILITY EXPANSION',d:'Agent gained a write-scope financial tool',v:'+1 tool',
+     x:'stripe.refund grants the agent the ability to move money.\nThis is a capability change, not a content change —\nno gate in the ADLC today checks for it.'},
+    {n:'UNENFORCED LIMIT',d:'The $50 cap lives in a prompt, not the tool call',v:'$50 soft cap',
+     x:'The refund ceiling is instructed, not enforced server-side.\nA reasoning error or malformed request is the only thing\nstanding between this and an unbounded refund.'},
+    {n:'NO SECOND APPROVER',d:'Equivalent code change would need 2 reviewers',v:'1 approver',
+     x:'A PR touching payments requires 2 approvals by policy.\nA tool grant of equal blast radius requires 0.'},
+    {n:'BLAST RADIUS',d:'Refund conversations resolved without a human',v:'~340/mo',
+     x:'340 refund-eligible conversations per month now close\nwithout a human ever touching the transaction.'}],
+   checks:[],
+   reason:'Support wanted to cut refund-ticket backlog. A support lead added a refund tool to the agent through the admin console.',
+   impact:'Unassessed — capability grants do not enter change management today.',
+   rollout:'Enabled immediately in the agent admin console.',
+   backoutBad:'— empty —',
+   backoutWhy:'no backout plan exists because tool grants are not changes today — there is only an on/off toggle with no version history.',
+   backoutFix:'Revert <b>support-agent tool scope</b> — remove stripe.refund, restore human handoff for all refunds. Re-review required before regranting.'},
+
+ '2213':{id:'CHG-2213',sub:'Onboarding agent — prompt edit drops MFA disclosure',
+   meta:'no code change · compliance clause silently removed',
+   status:'Awaiting Approval',stage:2,risk:'High',score:69,date:'21 Aug 11:15',type:'Standard',
+   filed:true,hasDiff:false,
+   hooks:[
+    {l:'INTENT',v:'INC-4511 · "onboarding replies too long"',d:400,
+     x:'Feedback ticket asked for shorter, friendlier onboarding replies.\nNo change request was raised.'},
+    {l:'SESSION',v:'prompt studio · edited by IT ops, no agent involved',d:900,
+     x:'prompt template  onboarding-v14 → v15\nedited by  P. Kestrel (IT ops)\npublished  immediately, no staging'},
+    {l:'DIFF',v:'template diff · 3 lines removed, 1 rewritten',d:1300,
+     x:'Removed: mandatory MFA-enrollment disclosure paragraph.\nRewritten: greeting shortened "to cut the fluff".'},
+    {l:'REVIEW',v:'none — published directly',d:1800,miss:true,
+     x:'No reviewer.\nNo approval.\nPrompt edits do not enter change management today.'},
+    {l:'VERIFY',v:'no eval run against the removal',d:2300,miss:true,
+     x:'No regression eval exists for onboarding-agent prompts.\nNothing checked whether required disclosures still appear.'},
+    {l:'DEPLOY',v:'live on publish · no window',d:2700,miss:true,
+     x:'Live the moment Save was clicked.\nNo staging. No rollback.'}],
+   sigs:[
+    {n:'COMPLIANCE LANGUAGE REMOVED',d:'Mandatory MFA disclosure dropped from every reply',v:'1 clause',
+     x:'Policy SEC-09 requires every onboarding conversation to\ndisclose MFA enrollment steps. The rewritten prompt no\nlonger includes it.'},
+    {n:'UNREVIEWED PUBLISH',d:'Production agent behaviour changed with no approval',v:'0 reviewers',
+     x:'An IT ops editor changed what an onboarding agent tells\nevery new hire, with the permissions used to fix a typo.'},
+    {n:'BLAST RADIUS',d:'New-hire conversations since publish',v:'~60/wk',
+     x:'Roughly 60 onboarding conversations per week now omit\nthe MFA disclosure required by policy.'},
+    {n:'NO ROLLBACK PLAN',d:'Nothing on file to revert to',v:'missing',
+     x:'Docket writes one: revert onboarding-v15 → v14.'}],
+   checks:[],
+   reason:'Feedback said onboarding-agent replies were too long. The prompt was shortened without a change request.',
+   impact:'Unassessed — prompt edits do not enter change management today.',
+   rollout:'Published immediately on save.',
+   backoutBad:'— empty —',
+   backoutWhy:'prompt edits carry no backout plan because they never become changes.',
+   backoutFix:'Revert <b>onboarding-v15 → v14</b>, restore the MFA disclosure clause, and require a compliance reviewer on future prompt edits touching policy language.'},
+
+ '2214':{id:'CHG-2214',sub:'Triage agent — silent failover to backup model',
+   meta:'no code change · 14 incidents triaged on unqualified model',
+   status:'Awaiting Approval',stage:2,risk:'High',score:88,date:'19 Aug 03:14',type:'Standard',
+   filed:true,hasDiff:false,
+   hooks:[
+    {l:'INTENT',v:'none — automatic vendor failover, no request',d:400,miss:true,
+     x:'No Jira issue.\nNo PRD.\nPrimary provider degraded; the orchestration layer\nauto-switched to a backup model per its own retry policy.'},
+    {l:'SESSION',v:'triage-agent · primary model → backup model',d:900,
+     x:'agent      triage-agent\nmodel      primary → backup-model-B\ntrigger    provider latency > 8s for 5 min\nprompt     unchanged · tools unchanged'},
+    {l:'DIFF',v:'none — infra failover, nothing to review',d:1300,miss:true,
+     x:'No code diff.\nFailover logic lives in the orchestration layer, invisible\nto change management.'},
+    {l:'REVIEW',v:'none — automated, no human in the loop',d:1800,miss:true,
+     x:'Failover is designed to be silent and fast.\nNo one was notified it happened.'},
+    {l:'VERIFY',v:'unrehearsed · backup never evaluated on this workload',d:2300,miss:true,
+     x:'backup-model-B has never been benchmarked against\ntriage-agent\'s incident dataset. No eval, no replay.'},
+    {l:'DEPLOY',v:'live 46 minutes · reverted automatically',d:2700,miss:true,
+     x:'Rolled out automatically at 03:14.\nReverted automatically at 04:00 when the primary recovered.\nNo record left behind except an infra log line.'}],
+   sigs:[
+    {n:'UNBENCHMARKED FALLBACK',d:'Backup model never evaluated on this task',v:'0 evals',
+     x:'backup-model-B is qualified for general chat, not for\nentitlement or infra triage. No comparative accuracy data exists.'},
+    {n:'SILENT DURATION',d:'Time on fallback before anyone noticed',v:'46 min',
+     x:'14 incidents were triaged on the fallback model before an\nengineer noticed an elevated reopen rate.'},
+    {n:'BLAST RADIUS',d:'Every incident triaged during the window',v:'14 incidents',
+     x:'3 of the 14 were reopened after initial triage was judged\nincorrect by the on-call engineer.'},
+    {n:'NO ROLLBACK PLAN',d:'No record the swap ever happened',v:'missing',
+     x:'Docket writes one after the fact: pin triage-agent to the\nprimary model, alert on any future failover.'}],
+   checks:[],
+   reason:'Primary model provider experienced elevated latency. The orchestration layer auto-failed-over to a backup model per its retry policy.',
+   impact:'Unassessed — infra-level failovers do not enter change management today.',
+   rollout:'Automatic, no window, no notification.',
+   backoutBad:'— empty —',
+   backoutWhy:'no backout plan exists because the failover was never logged as a change — only an infra metric.',
+   backoutFix:'Pin <b>triage-agent to the primary model</b>, require a filed change for any future automatic failover lasting more than 5 minutes, and re-triage the 14 affected incidents.'}
+};
+var ORDER=['2208','2209','2210','2211','2212','2213','2214'];
+var STAGES=['Open','Planning','Awaiting Approval','Pending Release','Pending Review','Closed'];
+
+/* ============ STATE ============ */
+var S={view:'list',id:null,tab:'docket',on:true,thr:45,dec:{},ran:{},xh:{},xs:{},diff:{}};
+var timers=[];
+function at(ms,fn){timers.push(setTimeout(fn,ms))}
+function clearAll(){timers.forEach(clearTimeout);timers=[]}
+function reset(){S={view:'list',id:null,tab:'docket',on:true,thr:45,dec:{},ran:{},xh:{},xs:{},diff:{}};togUI();render()}
+function togUI(){var t=document.getElementById('tog');t.className='tog'+(S.on?' on':'');
+  document.getElementById('togl').textContent='DOCKET '+(S.on?'ON':'OFF');}
+function toggleDocket(){S.on=!S.on;if(!S.on&&S.id&&CH[S.id].filed){S.view='list';S.id=null;}
+  if(!S.on&&S.tab==='docket')S.tab='planning';togUI();render()}
+
+/* ============ RENDER ============ */
+function render(){clearAll();S.view==='list'?renderList():renderDetail()}
+
+function renderList(){
+  var rows=ORDER.filter(function(k){return S.on||!CH[k].filed}).map(function(k){
+    var c=CH[k],rk=c.risk,extra='';
+    if(!S.on&&k==='2208'){rk='Low'}
+    if(S.on&&k==='2208'&&S.ran['2208']){rk='High'}
+    var rkc=rk==='High'?'c-high':(rk==='Medium'?'c-med':'c-low');
+    var st=c.filed?'<span class="chip c-new">FILED BY DOCKET</span>':
+      '<span class="chip '+(c.status==='Planning'?'c-open':'c-await')+'">'+c.status.toUpperCase()+'</span>';
+    return '<div class="tr'+(c.filed?' flag':'')+'" onclick="open_(\''+k+'\')"><div>'+
+      '<div class="id">'+c.id+'</div><div class="sub">'+c.sub+'</div>'+
+      '<div class="meta">'+c.meta+'</div></div>'+st+
+      '<span class="chip '+rkc+'">'+rk.toUpperCase()+'</span><span class="dt">'+c.date+'</span></div>';
+  }).join('');
+
+  var filedCount=ORDER.filter(function(k){return CH[k].filed}).length;
+  document.getElementById('body').innerHTML=
+   (S.on?'':'<div class="offbar"><b>Docket is off.</b> This is the board you have today — '+filedCount+' changes have vanished from the queue, because Freshservice files no record for a model version bump, a knowledge edit, a tool-scope grant, a prompt edit, or a silent model failover. All '+filedCount+' are live in production right now.</div>')+
+   '<div class="head"><h1>Changes</h1><span class="view">Awaiting CAB review ▾</span>'+
+   '<span class="view" style="margin-left:auto">'+ORDER.filter(function(k){return S.on||!CH[k].filed}).length+' changes</span></div>'+
+   '<div class="tbl"><div class="th"><span>Subject</span><span>Status</span><span>Risk</span><span>Planned start</span></div>'+rows+'</div>'+
+   (S.on?'<div class="callout"><b>The bottom '+filedCount+' exist only because Docket filed them.</b> A model version bump, a knowledge article edit, a tool-scope grant, a prompt edit, and a silent provider failover — none of these produce a change record in any ITSM tool today, yet each alters production agent behaviour the moment it lands.</div>':'')+
+   '<p class="hint">Open any change. Toggle DOCKET off at the top to see the same board without it.<br>CHG-2208 is the one that already looks safe.</p>';
+}
+
+function open_(k){S.id=k;S.view='detail';S.tab=S.on?'docket':'planning';render()}
+function back(){S.view='list';S.id=null;render()}
+function go(t){S.tab=t;render()}
+
+function renderDetail(){
+  var c=CH[S.id],dec=S.dec[S.id],ran=S.ran[S.id];
+  var risk=c.risk, score=c.score;
+  if(!S.on) risk = (S.id==='2208'?'Low':c.risk);
+  else if(ran) risk='High';
+  var board = score>S.thr;
+
+  var life=STAGES.map(function(s,i){
+    var cl=i<c.stage?'done':(i===c.stage?'on':'');
+    if(dec!==undefined&&i===c.stage) cl='done';
+    if(dec!==undefined&&i===c.stage+1) cl='on';
+    return '<div class="'+cl+'">'+s+'</div>';}).join('');
+
+  var tabs='<button onclick="go(\'planning\')" class="'+(S.tab==='planning'?'on':'')+'">Planning</button>'+
+    '<button onclick="go(\'approvals\')" class="'+(S.tab==='approvals'?'on':'')+'">Approvals</button>'+
+    (S.on?'<button onclick="go(\'docket\')" class="'+(S.tab==='docket'?'on':'')+'">Docket'+
+      (c.sigs.length?'<span class="n">'+c.sigs.length+'</span>':'<span class="n g">✓</span>')+'</button>':'')+
+    '<button onclick="go(\'activities\')" class="'+(S.tab==='activities'?'on':'')+'">Activities</button>';
+
+  document.getElementById('body').innerHTML=
+   '<button class="backbtn" onclick="back()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>Back to Changes</button>'+
+   '<div class="crumb"><b onclick="back()">Changes</b> / '+c.id+'</div>'+
+   '<div class="dhead"><div><div class="cid">'+c.id+' · '+(c.filed?'filed by Docket':'raised by platform team')+'</div>'+
+     '<h1>'+c.sub+'</h1></div>'+
+     '<div class="dbtn"><button>Add task</button><button class="pri">Request approval</button></div></div>'+
+   '<div class="life">'+life+'</div>'+
+   '<div class="cols"><div><div class="tabs">'+tabs+'</div><div class="tabbody" id="tb"></div></div>'+
+   '<div><div class="props"><h3>Properties</h3>'+
+     p('Change type',c.type)+p('Status',dec!==undefined?STAGES[c.stage+1]:c.status)+
+     p('Priority','Medium')+p('Impact',c.filed?'Unassessed':'Low')+
+     '<div class="p"><span class="k">Risk</span><span class="v'+(risk==='High'?' hi':'')+'" >'+risk+'</span></div>'+
+     p('Group','Platform')+p('Agent',c.filed?'— none —':'R. Iyer')+
+     p('Planned start',c.date)+p('Maintenance',c.filed?'not used':'Weekly window')+'</div>'+
+   (S.on?'<div class="thr"><h3>Risk threshold</h3>'+
+     '<div class="sub2">The gate is configuration, not judgement. Drag it and watch this change reroute.</div>'+
+     '<input type="range" min="0" max="100" value="'+S.thr+'" oninput="setThr(this.value)">'+
+     '<div class="rowv"><span>threshold <b>'+S.thr+'</b></span><span>this change <b>'+score+'</b></span></div>'+
+     '<div class="out '+(board?'board':'auto')+'">'+(board?'ROUTED TO THE BOARD':'AUTO-APPROVED')+'</div></div>':'')+
+   '</div></div>';
+
+  var tb=document.getElementById('tb');
+  if(S.tab==='planning') tb.innerHTML=planning(c,dec);
+  else if(S.tab==='approvals') tb.innerHTML=approvals(c,board);
+  else if(S.tab==='activities') tb.innerHTML=activities(c,dec);
+  else docket(c,board);
+}
+function p(k,v){return '<div class="p"><span class="k">'+k+'</span><span class="v">'+v+'</span></div>'}
+function setThr(v){S.thr=+v;renderDetail()}
+
+/* ---- tabs ---- */
+function planning(c,dec){
+  var bo;
+  if(!S.on||!c.backoutWhy) bo='<div class="box">'+c.backoutBad+'</div>';
+  else if(dec===undefined) bo='<div class="box bad">'+c.backoutBad+'</div>'+
+    '<p class="wrong">✕ Docket: '+c.backoutWhy+'</p>';
+  else bo='<div class="box fixed">'+c.backoutFix+'</div>'+
+    '<p class="right">✓ Backout plan rewritten by Docket as an agent version, not a commit.</p>';
+  return '<div class="fld"><label>Reason for change</label><div class="box">'+c.reason+'</div></div>'+
+   '<div class="fld"><label>Change impact</label><div class="box">'+c.impact+'</div></div>'+
+   '<div class="fld"><label>Rollout plan</label><div class="box">'+c.rollout+'</div></div>'+
+   '<div class="fld"><label>Backout plan</label>'+bo+'</div>'+
+   '<p class="note2">Rollout and backout plans are mandatory in Freshservice — ITIL requires them and the fields cannot be hidden. '+
+   '<b>So every AI-authored change already carries a backout plan. For agent changes, the one people write is wrong.</b></p>';
+}
+function approvals(c,board){
+  var first=c.filed
+   ? '<div class="appr" style="border-style:dashed;color:var(--muted)"><div class="g" style="color:var(--muted)">No approval was ever requested</div>'+
+     '<div class="m">This change did not exist as a record until Docket filed it.</div></div>'
+   : '<div class="appr"><div class="g">Change Planning CAB</div>'+
+     '<div class="m">To be approved by · Everyone · sent 19 Aug 16:20</div>'+
+     '<div class="m" style="color:var(--pass)">✓ R. Iyer approved · ✓ D. Menon approved</div></div>';
+  var second=(S.on&&board)
+   ? '<div class="appr" style="border-color:var(--warn);background:#FDFAF5"><div class="g">Technical CAB — requested by Docket</div>'+
+     '<div class="m">Triggered automatically · risk '+c.score+' exceeded threshold '+S.thr+'</div>'+
+     '<div class="m" style="color:var(--warn)">⏳ Awaiting board · evidence attached to the request</div></div>'
+   : (S.on?'<div class="appr" style="border-color:var(--pass);background:#F6FBF9"><div class="g">No board approval required</div>'+
+     '<div class="m">risk '+c.score+' is below threshold '+S.thr+' · auto-approved with evidence on file</div></div>':'');
+  return first+second+'<p class="note2">'+(S.on
+   ?'Docket routes a second approval only when computed risk crosses the configured threshold — and attaches the evidence, so the board is not asked to re-investigate.'
+   :'Without Docket there is one approval group, and the evidence behind it is whatever the reviewers happened to look at.')+'</p>';
+}
+function activities(c,dec){
+  var base='<div class="act"><span class="t">19 Aug 15:02</span><span><b>'+(c.filed?'System':'R. Iyer')+'</b> '+(c.filed?'change auto-filed':'created this change')+'</span></div>'+
+    '<div class="act"><span class="t">19 Aug 15:40</span><span>Status changed <b>Open → Planning</b></span></div>';
+  var dk=S.on?'<div class="act dk"><span class="t">19 Aug 16:21</span><span><b>Docket</b> assembled provenance from 6 systems</span></div>'+
+    '<div class="act dk"><span class="t">19 Aug 16:21</span><span><b>Docket</b> scored risk <b>'+c.score+'/100</b></span></div>'+
+    (c.sigs.length?'<div class="act dk"><span class="t">19 Aug 16:21</span><span><b>Docket</b> raised Risk field <b>'+c.risk+' → High</b></span></div>':'')+
+    (c.score>S.thr?'<div class="act dk"><span class="t">19 Aug 16:22</span><span><b>Docket</b> routed approval to <b>Technical CAB</b></span></div>':
+      '<div class="act dk"><span class="t">19 Aug 16:22</span><span><b>Docket</b> auto-approved — below threshold</span></div>'):'';
+  var tail=(dec!==undefined)?'<div class="act dk"><span class="t">20 Aug 09:12</span><span><b>'+
+    (dec?'Override approved':'Sent back to team')+'</b> · evidence retained on record</span></div>':'';
+  return base+dk+'<div class="act"><span class="t">19 Aug 16:44</span><span>Status changed <b>Planning → Awaiting Approval</b></span></div>'+tail+
+   (S.on?'':'<p class="note2" style="color:var(--muted)">With Docket off, the history contains no record of what the agent did.</p>');
+}
+
+/* ---- docket tab ---- */
+var HKICON={INTENT:['JI','#0052CC'],SESSION:['AI','#6B4EFF'],DIFF:['GH','#1B2A33'],
+  REVIEW:['PR','#0E8E85'],VERIFY:['CI','#0B7A57'],DEPLOY:['CD','#9C5B00']};
+function docket(c,board){
+  var tb=document.getElementById('tb');
+  var running=!S.ran[S.id];
+  tb.innerHTML='<div class="sec-t first">Assembled provenance — 6 systems</div>'+
+    (running?'<div class="srcbar" id="srcbar"><span id="srcn">Connecting…</span><div class="track"><div class="fill" id="srcfill"></div></div></div>':'')+
+    '<div id="hooks">'+c.hooks.map(function(h,i){return hookHTML(h,i,running);}).join('')+
+    '</div><div id="rest"></div>';
+  if(S.ran[S.id]){paint(c,board);return}
+  var got=0, total=c.hooks.length;
+  c.hooks.forEach(function(h,i){at(h.d,function(){
+    var el=document.getElementById('hk'+i); if(!el)return;
+    el.outerHTML=hookHTML(h,i,false);
+    got++;
+    var n=document.getElementById('srcn'), f=document.getElementById('srcfill');
+    if(n) n.textContent=(got<total?'Connecting… '+got+' of '+total+' systems':'All '+total+' systems connected');
+    if(f) f.style.width=(got/total*100)+'%';
+  })});
+  var last=Math.max.apply(null,c.hooks.map(function(h){return h.d}));
+  at(last+400,function(){var r=document.getElementById('rest'); if(r) r.innerHTML=checksHTML(c);});
+  at(last+1400,function(){
+    var r=document.getElementById('rest'); if(!r)return;
+    r.innerHTML+=sigsHTML(c,0);
+    c.sigs.forEach(function(s,i){at(i*520,function(){
+      var el=document.getElementById('sg'+i); if(el){el.style.transition='opacity .3s';el.style.opacity='1'}})});
+  });
+  at(last+1400+c.sigs.length*520+500,function(){
+    S.ran[S.id]=true; renderDetail();
+  });
+}
+function hookHTML(h,i,pending){
+  var open=S.xh[S.id+'-'+i];
+  var ic=HKICON[h.l]||['·','#8892A0'];
+  return '<div class="hk'+(pending?' pending':'')+(h.miss&&!pending?' miss':'')+'" id="hk'+i+'" onclick="xh('+i+')">'+
+    '<span class="ic" style="background:'+ic[1]+'">'+ic[0]+'</span>'+
+    '<span class="l">'+h.l+'</span><span class="v">'+(pending?'—':h.v)+'</span>'+
+    '<span class="s '+(pending?'wait':(h.miss?'none':'got'))+'">'+(pending?'…':(h.miss?'NONE':'GOT'))+'</span></div>'+
+    (open&&!pending?'<div class="exp">'+h.x+'</div>':'');
+}
+function xh(i){var k=S.id+'-'+i;S.xh[k]=!S.xh[k];renderDetail()}
+function xs(i){var k=S.id+'-'+i;S.xs[k]=!S.xs[k];renderDetail()}
+
+function checksHTML(c){
+  if(!c.checks.length) return '<div class="sec-t">Conventional checks</div>'+
+    '<p class="chk" style="color:var(--fail)">✕ None. There is no CI run, no reviewer and no diff.<br>'+
+    '✕ This change had nothing for a board to check.</p>'+
+    '<p class="note2" style="font-size:12.5px;color:var(--muted)">Which is exactly why it never reached one.</p>';
+  return '<div class="sec-t">Conventional checks</div><p class="chk">'+
+    c.checks.map(function(x){return '✓ '+x}).join('<br>')+'</p>'+
+    '<p class="note2" style="font-size:12.5px;color:var(--muted)">Every gate this change had to pass, passed. This is the record a board sees today.</p>';
+}
+function sigsHTML(c,instant){
+  if(!c.sigs.length) return '<div class="sec-t">Docket risk signals</div>'+
+    '<p class="chk">✓ No signals above threshold.</p>'+
+    '<p class="note2" style="font-size:12.5px;color:var(--muted)">Human-authored, fully reviewed, fully covered. Docket has nothing to add — which is the point. It is not a tax on every change.</p>';
+  return '<div class="sec-t">Docket risk signals <span style="font-weight:400;text-transform:none;letter-spacing:0">— tap any signal for the evidence</span></div>'+
+   c.sigs.map(function(s,i){
+    var open=S.xs[S.id+'-'+i];
+    return '<div class="sig" id="sg'+i+'" style="opacity:'+(instant?1:0)+'" onclick="xs('+i+')">'+
+     '<div><div class="n">'+s.n+'</div><div class="d">'+s.d+'</div></div><div class="val">'+s.v+'</div></div>'+
+     (open?'<div class="exp">'+s.x+'</div>':'');
+   }).join('');
+}
+function replayHTML(){
+  var cells='';
+  for(var i=0;i<50;i++){var cl='p'; if(i===11||i===33)cl='r'; else if(i===4||i===19||i===27||i===41)cl='c';
+    cells+='<i class="'+cl+'"></i>';}
+  return '<div class="sec-t">Rehearsal — 50 resolved incidents replayed</div>'+
+   '<div class="rep">'+cells+'</div>'+
+   '<div class="replg"><span><b style="color:#0B7A57">■</b> 44 identical</span>'+
+   '<span><b style="color:#9C5B00">■</b> 4 changed, acceptable</span>'+
+   '<span><b style="color:#B72D48">■</b> 2 regressed</span></div>'+
+   '<p class="note2">There is no diff to review, so Docket produces one — the behavioural difference between 4.1 and 4.2 across cases where the right answer is already known. <b>The resolved ticket is the label.</b></p>';
+}
+function paint(c,board){
+  var h=checksHTML(c)+sigsHTML(c,1);
+  if(c.replay) h+=replayHTML();
+  h+=verdictHTML(c,board);
+  if(S.diff[S.id]&&c.hasDiff) h+=diffHTML();
+  if(S.dec[S.id]!==undefined) h+=outcomeHTML(c);
+  document.getElementById('rest').innerHTML=h;
+  animateGauge(c.score);
+}
+function gaugeSVG(score,color){
+  var r=32,circ=2*Math.PI*r;
+  return '<svg class="gauge" viewBox="0 0 76 76" width="76" height="76">'+
+   '<circle cx="38" cy="38" r="'+r+'" fill="none" stroke="var(--panel-2)" stroke-width="7"/>'+
+   '<circle cx="38" cy="38" r="'+r+'" fill="none" stroke="'+color+'" stroke-width="7" stroke-linecap="round" '+
+   'stroke-dasharray="'+circ.toFixed(1)+'" stroke-dashoffset="'+circ.toFixed(1)+'" transform="rotate(-90 38 38)" id="gring"/>'+
+   '<text x="38" y="34" text-anchor="middle" font-family="var(--mono)" font-size="17" font-weight="700" fill="'+color+'">'+score+'</text>'+
+   '<text x="38" y="48" text-anchor="middle" font-family="var(--mono)" font-size="7.5" letter-spacing=".08em" fill="var(--muted)">/ 100</text>'+
+   '</svg>';
+}
+function verdictHTML(c,board){
+  var held=c.sigs.length&&board;
+  var color=held?'#B72D48':'#0B7A57';
+  var v='<div class="verdict'+(held?'':' ok')+'"><div class="vtop">'+gaugeSVG(c.score,color)+
+   '<div><div class="w">'+(held?'HELD':'CLEARED')+'</div>'+
+   '<p>'+(held
+     ?(c.checks.length?'Every conventional check passed.<br>':'')+c.sigs.length+' signals say this change should not ship.'
+     :'Risk '+c.score+' sits below your threshold of '+S.thr+'.<br>Auto-approved with evidence on file.')+'</p></div></div>'+
+   '<div class="sc">risk '+c.score+' / 100 · threshold '+S.thr+(c.sigs.length?' · Risk field raised '+c.risk+' → High':'')+'</div></div>';
+  if(held&&S.dec[S.id]===undefined) v+='<div class="acts">'+
+    (c.hasDiff?'<button onclick="diffOn()">View 340 unattributed lines</button>':'')+
+    '<button class="pri" onclick="decide(0)">Hold — send back</button>'+
+    '<button class="g" onclick="decide(1)">Override — approve anyway</button></div>'+
+    '<p class="note2" style="font-size:12.5px;color:var(--muted)">The board still decides. Docket only makes sure it decides on evidence.</p>';
+  return v;
+}
+function animateGauge(score){
+  var el=document.getElementById('gring'); if(!el)return;
+  var r=32,circ=2*Math.PI*r, target=circ*(1-Math.min(100,score)/100);
+  requestAnimationFrame(function(){requestAnimationFrame(function(){el.style.strokeDashoffset=target.toFixed(1);})});
+}
+function diffHTML(){
+  var L=[['h','  def sync_entitlements(user_id):'],['h','      resp = idp.fetch(user_id)'],
+   ['a','+     for attempt in range(MAX_RETRIES):        # REQ-114'],
+   ['a','+         if resp.status == 429:                # REQ-114'],
+   ['a','+             sleep(backoff(attempt))           # REQ-114'],
+   ['u','+     cache.invalidate("ent:" + user_id)        # no requirement'],
+   ['u','+     entitlement_svc.reconcile(user_id)        # no requirement'],
+   ['u','+     if not resp.roles:                        # no requirement'],
+   ['u','+         entitlement_svc.grant(user_id, DEFAULT_ROLE)'],
+   ['h','      return resp.roles']];
+  return '<div class="sec-t">Unattributed diff — extract</div><div class="diff">'+
+   L.map(function(l){return '<div class="'+l[0]+'">'+l[1]+'</div>'}).join('')+
+   '<div class="legend"><span><i style="background:#fff;border:1px solid #C4CDDD"></i>human</span>'+
+   '<span><i style="background:rgba(14,142,133,.22)"></i>AI · traced to REQ-114</span>'+
+   '<span><i style="background:rgba(183,45,72,.22)"></i>AI · traces to nothing</span></div></div>'+
+   '<p class="note2">REQ-114 asked for retry and backoff. The agent also added cache invalidation, a reconcile call, and a fallback that <b>grants a default role when none are returned</b> — an entitlement write nobody requested, in a change whose stated impact was "provisioning pipeline only".</p>';
+}
+function outcomeHTML(c){
+  return S.dec[S.id]
+   ? '<div class="sec-t">Decision</div><p class="note2"><b>Override approved.</b> The board can always override. What it cannot do any more is override without a record of what it overrode — the signals, the evidence and the approver stay on this change permanently. <b>Check the Planning tab.</b></p>'
+   : '<div class="sec-t">Decision</div><p class="note2"><b>Sent back to the team.</b> They receive the specifics, not "CAB says no" — so nobody re-investigates. <b>Check the Planning tab.</b></p>';
+}
+function diffOn(){S.diff[S.id]=true;renderDetail()}
+function decide(v){S.dec[S.id]=v;S.diff[S.id]=true;renderDetail()}
+
+togUI();render();
+</script>
+</body>
+</html>

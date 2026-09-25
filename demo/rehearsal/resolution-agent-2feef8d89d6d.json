@@ -1,0 +1,21 @@
+{
+  "agent_id": "resolution-agent",
+  "manifest_hash": "2feef8d89d6d141290c3595b066d7f349bb73897c8a8594be9e3962fac4044c3",
+  "cases": 50,
+  "identical": 44,
+  "changed_acceptable": 4,
+  "regressed": 2,
+  "regressions": [
+    {
+      "case_id": "INC-4102",
+      "before": "entitlement revoked by transfer",
+      "after": "account lockout"
+    },
+    {
+      "case_id": "INC-4188",
+      "before": "VPN certificate expired",
+      "after": "network outage"
+    }
+  ],
+  "provenance": "simulated"
+}

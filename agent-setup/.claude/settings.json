@@ -1,0 +1,21 @@
+{
+  "hooks": {
+    "SessionStart": [
+      { "hooks": [ {
+          "type": "command",
+          "command": "bash \"${CLAUDE_PROJECT_DIR}/.claude/hooks/docket_session_start.sh\"",
+          "timeout": 10
+      } ] }
+    ],
+    "PostToolUse": [
+      { "matcher": "Edit|Write|MultiEdit|NotebookEdit",
+        "hooks": [ {
+          "type": "http",
+          "url": "http://localhost:8000/hooks/claude-code",
+          "timeout": 5,
+          "headers": { "Authorization": "Bearer $DOCKET_INGEST_TOKEN" },
+          "allowedEnvVars": ["DOCKET_INGEST_TOKEN"]
+      } ] }
+    ]
+  }
+}

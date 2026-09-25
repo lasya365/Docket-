@@ -1,0 +1,2278 @@
+<!-- Docket v3 frontend. One file, vanilla JS, no build step, same-origin fetches only.
+     Implements RFC-0003 section 12 (Frontend) against the HTTP API of section 11, and
+     renders the data contracts of section 6 (6.2 fragments, 6.3 manifest, 6.4 ChangeRecord,
+     6.5 signals/Run) plus the section 9 outputs: gate (9.5), chain (9.7), backout (9.8). -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light only">
+<title>Docket — Freshservice Change Management</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#FFFFFF;--bg:#F4F6F8;--panel:#F3F6F6;--panel-2:#EAF1F0;
+  --line:#DDE4E3;--line-2:#C2CFCD;
+  --ink:#122A2B;--ink-2:#3E5455;--muted:#6E8384;
+  --nav:#12292B;--nav-2:#1B3B3D;--nav-txt:#9FB8B9;
+  --pass:#0B7A57;--warn:#9C5B00;--fail:#B72D48;--accent:#0E8E85;
+  --fs-orange:#FF5E3A;
+  --ai:#6B4EFF;--mixed:#9C5B00;--human:#0B7A57;--unknown:#8892A0;
+  --ui:"Inter",system-ui,sans-serif;--mono:"JetBrains Mono",ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:var(--ui);font-size:14px}
+.shell{display:grid;grid-template-columns:190px 1fr;min-height:100vh}
+.nav{background:var(--nav);color:var(--nav-txt);padding:14px 0;position:sticky;top:0;height:100vh;overflow:auto}
+.logo{color:#fff;font-weight:700;font-size:15px;padding:0 16px 18px;letter-spacing:-.2px}
+.logo span{color:#4FD8CC}
+.nav a{display:flex;align-items:center;gap:10px;padding:9px 16px;color:var(--nav-txt);font-size:13px;cursor:pointer;text-decoration:none}
+.nav a.on{background:var(--nav-2);color:#fff;box-shadow:inset 3px 0 0 #4FD8CC}
+.nav a:hover{background:var(--nav-2)}
+.nav .grp{font-size:10px;letter-spacing:.12em;color:#628485;padding:16px 16px 6px;font-weight:600}
+.dot{width:16px;text-align:center;opacity:.85;font-size:13px}
+.top{background:var(--paper);border-bottom:1px solid var(--line);padding:10px 20px;
+  display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:15;flex-wrap:wrap}
+.newbtn{background:var(--accent);color:#fff;border:none;border-radius:4px;font-size:12.5px;font-weight:600;
+  padding:8px 13px;cursor:pointer;white-space:nowrap}
+.srch{flex:1;min-width:120px;max-width:320px;background:var(--panel);border:1px solid var(--line);
+  border-radius:4px;padding:7px 11px;font-size:12.5px;color:var(--muted)}
+.icnbtn{width:32px;height:32px;border-radius:5px;display:grid;place-items:center;color:var(--muted);
+  font-size:14px;cursor:pointer;border:1px solid transparent}
+.icnbtn:hover{background:var(--panel);border-color:var(--line)}
+.icnbtn.bell{position:relative}
+.icnbtn.bell:after{content:"";position:absolute;top:6px;right:7px;width:6px;height:6px;border-radius:50%;background:var(--fail);border:1.5px solid #fff}
+.wsname{font-size:12px;color:var(--ink-2);font-weight:600}
+.tog{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:10.5px;font-weight:700;
+  letter-spacing:.08em;color:var(--muted);cursor:pointer;user-select:none;border:1px solid var(--line);
+  padding:6px 10px;border-radius:4px;background:var(--paper)}
+.tog .sw{width:30px;height:17px;border-radius:9px;background:var(--line-2);position:relative;transition:background .2s}
+.tog .sw:after{content:"";position:absolute;top:2px;left:2px;width:13px;height:13px;border-radius:50%;
+  background:#fff;transition:transform .2s}
+.tog.on{color:var(--accent);border-color:var(--accent)}
+.tog.on .sw{background:var(--accent)}
+.tog.on .sw:after{transform:translateX(13px)}
+.av{width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;
+  display:grid;place-items:center;font-size:11px;font-weight:700}
+.main{min-width:0}
+.body{padding:20px}
+.offbar{background:#FBF3E8;border:1px solid var(--warn);color:var(--warn);border-radius:4px;
+  padding:11px 14px;font-size:13px;margin-bottom:16px;line-height:1.55}
+.errbar{background:#FBEDF0;border:1px solid var(--fail);color:var(--fail);border-radius:4px;
+  padding:10px 14px;font-size:12.5px;margin-bottom:14px;font-family:var(--mono);line-height:1.6}
+.head{display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+h1{font-size:20px;font-weight:600;margin:0;letter-spacing:-.2px}
+.view{font-size:12.5px;color:var(--muted);border:1px solid var(--line);border-radius:4px;
+  padding:6px 10px;background:var(--paper);cursor:pointer}
+.tbl{background:var(--paper);border:1px solid var(--line);border-radius:5px;overflow:hidden}
+.th,.tr{display:grid;grid-template-columns:1fr 150px 96px 108px 116px 92px;gap:12px;padding:12px 16px;align-items:center}
+.th.off,.tr.off{grid-template-columns:1fr 150px 108px}
+.th{background:var(--panel-2);font-size:10.5px;font-weight:700;letter-spacing:.09em;color:var(--muted);
+  text-transform:uppercase;border-bottom:1px solid var(--line)}
+.tr{border-bottom:1px solid var(--line);cursor:pointer}
+.tr:last-child{border-bottom:none}
+.tr:hover{background:var(--panel)}
+.tr .sub{font-size:14px;font-weight:600}
+.tr .id{font-family:var(--mono);font-size:10.5px;color:var(--muted);margin-bottom:3px;letter-spacing:.06em}
+.tr .meta{font-family:var(--mono);font-size:10.5px;color:var(--muted);margin-top:4px}
+.tr.flag{background:#FDF8F9}.tr.flag:hover{background:#FBF1F3}
+.dt{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.chip{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.07em;padding:3px 7px;
+  border-radius:3px;display:inline-block;white-space:nowrap}
+.c-open{background:#E4F5F3;color:var(--accent)}
+.c-await{background:#FBF3E8;color:var(--warn)}
+.c-low{background:#E9F4F0;color:var(--pass)}
+.c-med{background:#FBF3E8;color:var(--warn)}
+.c-high{background:#FBEDF0;color:var(--fail)}
+.c-vhigh{background:#B72D48;color:#fff}
+.c-new{background:#FBEDF0;color:var(--fail);border:1px dashed var(--fail)}
+.c-sim{background:#F3EEFF;color:var(--ai);border:1px dashed var(--ai)}
+.c-mut{background:var(--panel-2);color:var(--muted)}
+.c-ok{background:#E9F4F0;color:var(--pass)}
+.callout{margin-top:14px;border:1px dashed var(--fail);background:#FDF8F9;border-radius:4px;
+  padding:13px 15px;font-size:13px;color:var(--fail);line-height:1.6}
+.hint{font-family:var(--mono);font-size:11.5px;color:var(--muted);margin-top:14px;line-height:1.7}
+.crumb{font-size:12px;color:var(--muted);margin-bottom:10px}
+.crumb b{color:var(--accent);cursor:pointer;font-weight:500}
+.backbtn{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;color:var(--ink-2);
+  background:var(--paper);border:1px solid var(--line-2);border-radius:4px;padding:7px 12px;cursor:pointer;
+  margin-bottom:14px}
+.backbtn:hover{background:var(--panel);border-color:var(--accent);color:var(--accent)}
+.dhead{display:flex;align-items:flex-start;gap:14px;flex-wrap:wrap;margin-bottom:16px}
+.dhead h1{font-size:21px}
+.cid{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.08em}
+.dbtn{margin-left:auto;display:flex;gap:8px}
+.dbtn button{font-size:12.5px;font-weight:600;padding:8px 14px;border-radius:4px;border:1px solid var(--line-2);
+  background:var(--paper);color:var(--ink-2);cursor:pointer}
+.dbtn button.pri{background:var(--accent);border-color:var(--accent);color:#fff}
+.life{display:flex;background:var(--paper);border:1px solid var(--line);border-radius:5px;
+  overflow:auto;margin-bottom:16px;scrollbar-width:none}
+.life::-webkit-scrollbar{display:none}
+.life div{padding:11px 16px;font-size:11.5px;color:var(--muted);white-space:nowrap;position:relative;font-weight:500}
+.life div+div:before{content:"";position:absolute;left:0;top:9px;bottom:9px;width:1px;background:var(--line)}
+.life div.done{color:var(--pass)}
+.life div.on{color:#fff;background:var(--accent);font-weight:600}
+.cols{display:grid;grid-template-columns:1fr 264px;gap:16px;align-items:start}
+@media(max-width:860px){.cols{grid-template-columns:1fr}.shell{grid-template-columns:1fr}.nav{display:none}}
+.tabs{display:flex;border-bottom:1px solid var(--line);background:var(--paper);
+  border-radius:5px 5px 0 0;overflow:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tabs button{font-family:var(--ui);font-size:13px;font-weight:600;padding:12px 15px;border:none;
+  background:none;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap}
+.tabs button.on{color:var(--accent);border-bottom-color:var(--accent)}
+.tabs button .n{display:inline-block;margin-left:6px;background:var(--fail);color:#fff;font-family:var(--mono);
+  font-size:9px;font-weight:700;padding:2px 5px;border-radius:8px;vertical-align:1px}
+.tabs button .n.g{background:var(--pass)}
+.tabbody{background:var(--paper);border:1px solid var(--line);border-top:none;border-radius:0 0 5px 5px;padding:18px}
+.fld{margin-bottom:18px}
+.fld label{display:block;font-size:11px;font-weight:700;letter-spacing:.07em;color:var(--muted);
+  text-transform:uppercase;margin-bottom:6px}
+.fld .box{border:1px solid var(--line);border-radius:4px;padding:12px 14px;font-size:13.5px;
+  line-height:1.65;color:var(--ink-2);background:var(--paper);white-space:pre-wrap}
+.fld .box.bad{border-color:var(--fail);background:#FDF8F9;color:var(--fail)}
+.fld .box.fixed{border-color:var(--pass);background:#F2F9F6;color:var(--ink-2)}
+.wrong{font-family:var(--mono);font-size:10.5px;color:var(--fail);margin:6px 0 0;line-height:1.6;white-space:pre-wrap}
+.right{font-family:var(--mono);font-size:10.5px;color:var(--pass);margin:6px 0 0;line-height:1.6}
+.props{background:var(--paper);border:1px solid var(--line);border-radius:5px;padding:14px 16px;margin-bottom:16px}
+.props h3{font-size:11px;font-weight:700;letter-spacing:.09em;color:var(--muted);text-transform:uppercase;margin:0 0 12px}
+.props .p{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);
+  font-size:12.5px;align-items:center}
+.props .p:last-child{border-bottom:none}
+.props .k{color:var(--muted)}
+.props .v{color:var(--ink);font-weight:500;text-align:right;word-break:break-word}
+.props .v.hi{color:var(--fail);font-weight:700}
+.thr{background:var(--paper);border:1px solid var(--accent);border-radius:5px;padding:14px 16px;margin-bottom:16px}
+.body > .thr{display:grid;grid-template-columns:260px 1fr 200px;gap:6px 18px;align-items:center}
+.body > .thr h3{grid-column:1;margin:0}
+.body > .thr .sub2{grid-column:1;grid-row:2;margin:0}
+.body > .thr input[type=range]{grid-column:2;grid-row:1/3}
+.body > .thr .rowv{grid-column:2;grid-row:3;margin:0}
+.body > .thr .out{grid-column:3;grid-row:1/3;margin:0}
+.body > .thr .hashline{grid-column:3;grid-row:3;margin:0;text-align:center}
+.thr h3{font-size:11px;font-weight:700;letter-spacing:.09em;color:var(--accent);text-transform:uppercase;margin:0 0 4px}
+.thr .sub2{font-size:11.5px;color:var(--muted);line-height:1.5;margin-bottom:12px}
+.thr input[type=range]{width:100%;accent-color:var(--accent)}
+.thr .rowv{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11.5px;
+  color:var(--muted);margin-top:8px}
+.thr .rowv b{color:var(--accent)}
+.thr .out{margin-top:10px;font-family:var(--mono);font-size:11px;font-weight:700;padding:8px 10px;
+  border-radius:3px;text-align:center;letter-spacing:.06em}
+.out.board{background:#FBEDF0;color:var(--fail)}
+.out.auto{background:#E9F4F0;color:var(--pass)}
+.srcbar{display:flex;align-items:center;gap:10px;margin-bottom:14px;font-family:var(--mono);font-size:11px;color:var(--muted)}
+.srcbar .track{flex:1;height:5px;border-radius:3px;background:var(--panel-2);overflow:hidden}
+.srcbar .fill{height:100%;background:linear-gradient(90deg,var(--accent),#4FD8CC);border-radius:3px;
+  transition:width .5s ease;width:0%}
+.hk{display:grid;grid-template-columns:26px 82px 1fr auto;gap:12px;align-items:center;padding:10px 0;
+  border-bottom:1px solid var(--line);font-family:var(--mono);font-size:12px;cursor:pointer}
+.hk:hover{background:var(--panel)}
+.hk .ic{width:24px;height:24px;border-radius:5px;display:grid;place-items:center;font-family:var(--ui);
+  font-size:9.5px;font-weight:700;color:#fff;letter-spacing:.02em}
+.hk.pending .ic{background:var(--line-2)!important;color:var(--line-2)}
+.hk .l{font-weight:700;color:var(--accent);font-size:10.5px;letter-spacing:.07em}
+.hk .v{color:var(--ink-2);word-break:break-word}
+.hk .s{font-size:9px;font-weight:700;letter-spacing:.07em;padding:3px 7px;border-radius:3px}
+.hk.pending .v{opacity:.35}
+.hk.miss .v{color:var(--fail)}
+.s.wait{background:var(--panel-2);color:var(--muted)}
+.s.got{background:#E9F4F0;color:var(--pass)}
+.s.none{background:#FBEDF0;color:var(--fail)}
+.exp{background:var(--panel);border-left:2px solid var(--accent);padding:11px 14px;
+  font-family:var(--mono);font-size:11px;color:var(--ink-2);line-height:1.85;white-space:pre-wrap;word-break:break-word}
+.exp.miss{border-left-color:var(--fail)}
+.sec-t{font-size:11px;font-weight:700;letter-spacing:.09em;color:var(--muted);text-transform:uppercase;
+  margin:22px 0 10px;padding-top:16px;border-top:1px solid var(--line)}
+.sec-t.first{margin-top:0;padding-top:0;border-top:none}
+.chk{font-family:var(--mono);font-size:12.5px;line-height:2.05;color:var(--pass);margin:0;white-space:pre-wrap}
+.chk.bad{color:var(--fail)}
+.sig{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;
+  padding:11px 8px 11px 0;border-bottom:1px solid var(--line);cursor:pointer}
+.sig:hover{background:var(--panel)}
+.sig .n{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--fail);letter-spacing:.06em}
+.sig .d{font-size:12.5px;color:var(--ink-2);margin-top:3px}
+.sig .val{font-family:var(--mono);font-size:17px;font-weight:700;color:var(--fail);white-space:nowrap;text-align:right}
+.sig .sc2{font-family:var(--mono);font-size:10px;color:var(--muted);text-align:right;margin-top:2px}
+.sig.degraded{background:#FDFAF5;border-left:3px solid var(--warn);padding-left:9px}
+.sig.degraded .n,.sig.degraded .val{color:var(--warn)}
+.sig.notcomp{background:var(--panel);border-left:3px dashed var(--muted);padding-left:9px}
+.sig.notcomp .n,.sig.notcomp .val{color:var(--muted)}
+.sig.calm .n,.sig.calm .val{color:var(--pass)}
+.verdict{border:1.5px solid var(--fail);border-radius:5px;background:#FDF8F9;padding:20px;margin:16px 0}
+.verdict.ok{border-color:var(--pass);background:#F2F9F6}
+.vtop{display:flex;align-items:center;gap:18px;justify-content:center;text-align:left}
+.gauge circle:last-child{transition:stroke-dashoffset 1.1s cubic-bezier(.2,.8,.2,1)}
+.verdict .w{font-size:26px;font-weight:700;color:var(--fail);letter-spacing:-.5px;margin:0}
+.verdict.ok .w{color:var(--pass)}
+.verdict p{font-size:13.5px;color:var(--ink-2);margin:6px 0 0;line-height:1.6;white-space:pre-wrap}
+.verdict .sc{font-family:var(--mono);font-size:11.5px;color:var(--muted);margin-top:10px;text-align:center}
+.hs{margin-top:12px;border-top:1px dashed var(--fail);padding-top:10px}
+.hs .row{font-family:var(--mono);font-size:11px;color:var(--fail);line-height:1.7;display:flex;gap:8px}
+.hs .row b{white-space:nowrap}
+.diff{font-family:var(--mono);font-size:11.5px;line-height:1.85;overflow-x:auto;border:1px solid var(--line);
+  border-radius:4px;margin-top:10px}
+.dfile{border:1px solid var(--line);border-radius:4px;margin-bottom:14px;overflow:hidden}
+.dfile .fh{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--panel-2);
+  padding:9px 12px;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:11.5px}
+.dfile .fh .pth{font-weight:700;color:var(--ink);word-break:break-all}
+.dfile .fh .cnt{color:var(--muted)}
+.hunk{border-top:1px solid var(--line)}
+.hunk .hh{font-family:var(--mono);font-size:10.5px;color:var(--muted);background:var(--panel);
+  padding:6px 12px;cursor:pointer;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.hunk .hh:hover{background:var(--panel-2)}
+.dline{display:grid;grid-template-columns:8px 8px 56px 1fr;gap:0;align-items:stretch;font-family:var(--mono);font-size:11.5px}
+.dline .g1,.dline .g2{display:block}
+.g1.ai{background:var(--ai)}.g1.mixed{background:var(--mixed)}.g1.human{background:var(--human)}
+.g1.unknown{background:var(--unknown)}.g1.none{background:transparent}
+.g2.cov{background:var(--pass)}.g2.unc{background:var(--fail)}.g2.none{background:var(--panel-2)}
+.dline .ln{color:var(--muted);text-align:right;padding:1px 8px 1px 6px;background:var(--panel);
+  border-right:1px solid var(--line);font-size:10.5px}
+.dline .tx{padding:1px 12px;white-space:pre;overflow-x:auto;background:rgba(14,142,133,.06)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;padding:10px 12px;background:var(--panel);
+  border-top:1px solid var(--line);font-family:var(--mono);font-size:10px;color:var(--muted)}
+.legend i{font-style:normal;display:inline-block;width:9px;height:9px;border-radius:2px;vertical-align:-1px;margin-right:5px}
+.note2{font-size:13.5px;color:var(--ink-2);line-height:1.65;margin:12px 0 0;white-space:pre-wrap}
+.note2 b{color:var(--ink)}
+.note3{font-size:12.5px;color:var(--muted);line-height:1.65;margin:8px 0 0;white-space:pre-wrap}
+.appr{border:1px solid var(--line);border-radius:4px;padding:14px;margin-bottom:10px}
+.appr .g{font-size:13.5px;font-weight:600}
+.appr .m{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:5px;word-break:break-word}
+.act{display:grid;grid-template-columns:150px 1fr;gap:14px;padding:9px 0;border-bottom:1px solid var(--line);
+  font-size:12.5px;color:var(--ink-2)}
+.act:last-child{border-bottom:none}
+.act .t{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.act b{color:var(--ink)}
+.act.dk b{color:var(--accent)}
+.rep{display:grid;grid-template-columns:repeat(10,1fr);gap:4px;margin:12px 0}
+.rep i{height:20px;border-radius:2px;background:var(--panel-2);display:block}
+.rep i.p{background:#B7E0CE}.rep i.c{background:#F2D5A8}.rep i.r{background:#E9A6B4}
+.replg{font-family:var(--mono);font-size:10.5px;color:var(--muted);display:flex;gap:14px;flex-wrap:wrap}
+.foot{padding:14px 20px;color:var(--muted);font-family:var(--mono);font-size:10.5px}
+.foot span{color:var(--accent);cursor:pointer}
+/* v3 additions */
+.runbox{background:var(--paper);border:1px solid var(--line);border-radius:5px;padding:14px 16px;margin-bottom:16px;
+  display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.runbox h3{font-size:11px;font-weight:700;letter-spacing:.09em;color:var(--muted);text-transform:uppercase;margin:0 10px 0 0}
+.runbox input{font-family:var(--mono);font-size:12px;padding:7px 9px;border:1px solid var(--line);border-radius:4px;background:var(--paper);color:var(--ink)}
+.runbox input.pr{width:120px}.runbox input.repo{width:210px}.runbox input.agent{width:190px}
+.btn{font-size:12.5px;font-weight:600;padding:8px 13px;border-radius:4px;cursor:pointer;
+  border:1px solid var(--line-2);background:var(--paper);color:var(--ink-2)}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.pri:hover{color:#fff;opacity:.9}
+.btn.sm{font-size:11px;padding:5px 9px}
+.stat{font-family:var(--mono);font-size:11px;color:var(--muted);margin-left:auto}
+.brief{border:1px solid var(--ai);border-left:3px solid var(--ai);border-radius:4px;background:#FAF9FF;padding:14px 16px;margin-top:10px}
+.brief h4{margin:0 0 8px;font-size:12px;font-weight:700;color:var(--ai);letter-spacing:.02em}
+.brief p{margin:0 0 10px;font-size:13px;line-height:1.65;color:var(--ink-2);white-space:pre-wrap}
+.brief .src{font-family:var(--mono);font-size:10px;color:var(--muted)}
+.seal{display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:var(--panel);border:1px solid var(--line);
+  border-radius:4px;padding:10px 12px;margin-top:10px;font-family:var(--mono);font-size:11px;color:var(--muted)}
+.seal .hashv{color:var(--ink-2);word-break:break-all;flex:1;min-width:180px}
+.sess{border:1px solid var(--line);border-radius:4px;padding:14px;margin-bottom:14px}
+.sess.ghost{border-style:dashed;border-color:var(--fail);background:#FDF8F9}
+.sess h4{margin:0 0 4px;font-size:14px;font-weight:600}
+.kv{display:grid;grid-template-columns:150px 1fr;gap:6px 12px;font-family:var(--mono);font-size:11.5px;margin:10px 0}
+.kv .k{color:var(--muted)}.kv .v{color:var(--ink-2);word-break:break-word;white-space:pre-wrap}
+.bar{display:flex;height:18px;border-radius:3px;overflow:hidden;border:1px solid var(--line);margin:6px 0}
+.bar div{height:100%}
+.bar .rule{background:var(--accent)}.bar .hook{background:var(--warn)}.bar .human{background:var(--pass)}
+.tools{border:1px solid var(--line);border-radius:4px;overflow:hidden;margin-top:6px;max-height:320px;overflow-y:auto}
+.tools .t{display:grid;grid-template-columns:150px 1fr 120px;gap:10px;padding:5px 10px;font-family:var(--mono);
+  font-size:11px;border-bottom:1px solid var(--line);align-items:center}
+.tools .t:last-child{border-bottom:none}
+.tools .t.sens{background:#FDF8F9;color:var(--fail);font-weight:700}
+.tools .t .arg{color:var(--muted);word-break:break-all;font-weight:400}
+.turn{border-left:2px solid var(--accent);background:var(--panel);padding:8px 12px;margin:6px 0;
+  font-size:12.5px;color:var(--ink-2);line-height:1.6;white-space:pre-wrap}
+.turn .tn{font-family:var(--mono);font-size:10px;color:var(--muted);display:block;margin-bottom:3px}
+.tag{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.06em;padding:2px 6px;border-radius:3px;
+  background:#FBF3E8;color:var(--warn);border:1px solid var(--warn)}
+.ledg{background:var(--paper);border:1px solid var(--line);border-radius:5px;padding:14px 16px;margin-bottom:12px}
+.ledg .lh{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
+.ledg .lh .sq{font-family:var(--mono);font-size:11px;font-weight:700;color:#fff;background:var(--accent);
+  border-radius:3px;padding:2px 7px}
+.ledg .lh .ag{font-size:14px;font-weight:600}
+.absent{font-family:var(--mono);font-size:11.5px;color:var(--muted);background:var(--panel);border:1px dashed var(--line-2);
+  border-radius:4px;padding:9px 12px;line-height:1.6;white-space:pre-wrap}
+.absent.bad{color:var(--fail);border-color:var(--fail);background:#FDF8F9}
+.rowwrap{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.spacer{height:10px}
+</style>
+</head>
+<body>
+<div class="shell">
+  <nav class="nav">
+    <div class="logo">fresh<span>service</span></div>
+    <div class="grp">SERVICE DESK</div>
+    <a href="#/changes">▤&nbsp;Tickets</a><a href="#/changes">◈&nbsp;Problems</a>
+    <a id="nav-changes" href="#/changes">⇄&nbsp;Changes</a><a href="#/changes">▲&nbsp;Releases</a>
+    <div class="grp">ASSETS</div>
+    <a href="#/changes">▣&nbsp;Inventory</a><a href="#/changes">◎&nbsp;Contracts</a>
+    <div class="grp">AI &amp; AUTOMATION</div>
+    <a href="#/changes">⚙&nbsp;Workflow automator</a><a href="#/changes">◆&nbsp;Agent studio</a>
+    <a id="nav-ledger" href="#/ledger">☰&nbsp;Agent manifest ledger</a>
+    <div class="grp">ANALYTICS</div>
+    <a href="#/changes">◔&nbsp;Reports</a>
+  </nav>
+  <div class="main">
+    <div class="top">
+      <button class="newbtn" id="newbtn">+ New change</button>
+      <div class="srch">Search changes, assets, tickets…</div>
+      <div class="tog on" id="tog"><span class="sw"></span><span id="togl">DOCKET ON</span></div>
+      <span class="wsname">IT Workspace</span>
+      <div class="icnbtn">?</div>
+      <div class="icnbtn bell">🔔</div>
+      <div class="av">CM</div>
+    </div>
+    <div class="body" id="body"></div>
+    <div class="foot">Docket for Freshservice · <span id="footmode">live API</span> · <span id="reseed">seed demo</span></div>
+  </div>
+</div>
+<script>
+/* ============================================================================
+   Docket v3 frontend — RFC-0003 section 12.
+
+   Assumptions recorded as RFC section 0 rule 2 requires:
+   A1. `hunk_attribution[].prompt_id` has no explicit index into
+       `SessionSection.prompt_excerpts`. Fixtures shape it as "{session_id}-p{N}",
+       so a trailing "-p{N}" is read as the 1-based turn number and used to pick
+       the excerpt. When it does not parse, the turn is shown without an excerpt.
+   A2. Sensitive tools/paths are never hard-coded here. They come from
+       `GET /config/gate`: `sensitive.{paths,tools,bash_patterns}`, falling back to the
+       top-level `sensitive_paths` the gate needs for HS3. Only when config carries no
+       tool list at all are the names in the blast_radius evidence used instead.
+   A3. `GET /changes` rows carry `hard_stops` (a list of ids), so dragging the
+       slider previews exactly what RFC 12 asks for: HOLD if `composite > value`
+       OR any hard stop fired. `PUT /config/threshold` remains authoritative and
+       its response overwrites the preview on release.
+   A4. Freshservice lifecycle chrome (stage strip, "Request approval") is display
+       chrome from the Stage 1 prototype and is derived from `decision`, not fetched.
+   ========================================================================== */
+'use strict';
+
+var QS = new URLSearchParams(location.search);
+var MOCK = QS.get('mock') === '1';
+
+var S = {
+  on: true,                 // Docket ON / OFF, client-side only
+  route: { name: 'changes', key: null },
+  tab: 'docket',
+  changes: null, gate: null, thr: null, thrDrag: null,
+  run: null, runKey: null, runs: [], verify: null, briefOpen: true,
+  ledger: null, ledgerAgent: '', sessions: null, checked: null,
+  openLink: {}, openSig: {}, openHunk: {}, openFile: {},
+  revealed: {}, reveal: 0, progress: null,
+  err: null, busy: false, timers: [], poll: null
+};
+
+/* ---------------- DOM helpers. Text always via textContent (RFC 12 rule). ------ */
+function h(tag, cls, text) {
+  var e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (text !== undefined && text !== null) e.textContent = String(text);
+  return e;
+}
+function add(parent, child) { parent.appendChild(child); return child; }
+function clear(n) { while (n.firstChild) n.removeChild(n.firstChild); return n; }
+function txt(parent, tag, cls, text) { return add(parent, h(tag, cls, text)); }
+function btn(label, cls, onclick) {
+  var b = h('button', cls || 'btn', label);
+  b.addEventListener('click', onclick);
+  return b;
+}
+function svgEl(tag, attrs) {
+  var e = document.createElementNS('http://www.w3.org/2000/svg', tag);
+  for (var k in attrs) if (attrs[k] !== null && attrs[k] !== undefined) e.setAttribute(k, String(attrs[k]));
+  return e;
+}
+function safeHref(a, url) {                 // untrusted URLs: only http(s) ever reaches href
+  if (typeof url === 'string' && /^https?:\/\//i.test(url)) { a.href = url; a.target = '_blank'; a.rel = 'noopener noreferrer'; }
+  return a;
+}
+function clearTimers() { S.timers.forEach(clearTimeout); S.timers = []; }
+function at(ms, fn) { S.timers.push(setTimeout(fn, ms)); }
+
+/* ---------------- small formatters ---------------- */
+function num(v, d) { return (typeof v === 'number' && isFinite(v)) ? v.toFixed(d === undefined ? 2 : d) : '—'; }
+function pct(v) { return (typeof v === 'number' && isFinite(v)) ? Math.round(v * 100) + '%' : '—'; }
+function when(iso) {
+  if (!iso) return '—';
+  var d = new Date(iso);
+  if (isNaN(d.getTime())) return String(iso);
+  return d.toLocaleString(undefined, { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+}
+function short(s, n) { s = (s === null || s === undefined) ? '' : String(s); return s.length > n ? s.slice(0, n) + '…' : s; }
+function has(v) { return v !== null && v !== undefined && v !== ''; }
+function titleCase(s) { s = String(s || ''); return s.charAt(0).toUpperCase() + s.slice(1).replace(/_/g, ' '); }
+
+/* gitwildmatch subset: **, *, ? — used only for the "out of scope" tag (RFC 12). */
+function globRe(glob) {
+  var out = '', i = 0, g = String(glob);
+  while (i < g.length) {
+    var c = g[i];
+    if (c === '*' && g[i + 1] === '*') {
+      if (g[i + 2] === '/') { out += '(?:.*/)?'; i += 3; continue; }
+      out += '.*'; i += 2; continue;
+    }
+    if (c === '*') { out += '[^/]*'; i++; continue; }
+    if (c === '?') { out += '[^/]'; i++; continue; }
+    out += c.replace(/[.+^${}()|[\]\\]/g, '\\$&'); i++;
+  }
+  return new RegExp('^' + out + '$');
+}
+function matchesAny(path, globs) {
+  if (!globs || !globs.length) return false;
+  for (var i = 0; i < globs.length; i++) { try { if (globRe(globs[i]).test(path)) return true; } catch (e) { } }
+  return false;
+}
+
+/* ---------------- chips / badges ---------------- */
+function chip(text, cls) { return h('span', 'chip ' + (cls || 'c-mut'), text); }
+function riskChip(level) {
+  var m = { low: 'c-low', medium: 'c-med', high: 'c-high', very_high: 'c-vhigh' };
+  return chip(String(level || 'unknown').replace('_', ' ').toUpperCase(), m[level] || 'c-mut');
+}
+function decisionChip(d) { return chip(d === 'APPROVE' ? 'APPROVE' : (d === 'HOLD' ? 'HOLD' : 'NO DECISION'), d === 'APPROVE' ? 'c-ok' : (d === 'HOLD' ? 'c-high' : 'c-mut')); }
+/* P8: a visible badge wherever a simulated section is displayed. */
+function provBadge(section) {
+  if (!section || section.provenance !== 'simulated') return null;
+  return chip('SIMULATED', 'c-sim');
+}
+function addProv(parent, section) { var b = provBadge(section); if (b) add(parent, b); return b; }
+
+/* ---------------- API (RFC section 11). Relative URLs, same origin only. ------- */
+/* DOCKET_API_TOKEN (RFC 5.5: "bearer token for write routes used by the UI").
+   Kept in sessionStorage only: it survives a reload, dies with the tab, and is
+   never written into the page or a URL. Empty means the server runs without one. */
+function apiToken() {
+  try { return sessionStorage.getItem('docket.apiToken') || ''; } catch (e) { return ''; }
+}
+function setApiToken(v) {
+  try { if (v) sessionStorage.setItem('docket.apiToken', v); else sessionStorage.removeItem('docket.apiToken'); } catch (e) { /* storage blocked */ }
+}
+function api(path, opts) {
+  if (MOCK) return mockApi(path, opts);
+  var o = opts || {};
+  var init = { method: o.method || 'GET', headers: {} };
+  if (o.body !== undefined) { init.headers['Content-Type'] = 'application/json'; init.body = JSON.stringify(o.body); }
+  var tok = apiToken();
+  if (tok) init.headers['Authorization'] = 'Bearer ' + tok;
+  return fetch(path, init).then(function (r) {
+    if (r.status === 401) throw new Error('401 on ' + path + ': this Docket has DOCKET_API_TOKEN set. Paste it into the "API token" field and try again.');
+    if (!r.ok) throw new Error(r.status + ' ' + r.statusText + ' on ' + path);
+    if (r.status === 204) return null;
+    return r.json();
+  });
+}
+function fail(e) { S.err = (e && e.message) ? e.message : String(e); S.busy = false; render(); }
+function withBusy(p) { S.busy = true; render(); return p.then(function (v) { S.busy = false; return v; }); }
+
+/* ---------------- routing: #/changes, #/changes/{key}, #/ledger ---------------- */
+function parseHash() {
+  var raw = location.hash.replace(/^#/, '');
+  var parts = raw.split('/').filter(function (x) { return x.length; });
+  if (parts[0] === 'ledger') return { name: 'ledger', key: null };
+  if (parts[0] === 'changes' && parts.length > 1) return { name: 'change', key: decodeURIComponent(parts.slice(1).join('/')) };
+  return { name: 'changes', key: null };
+}
+function go(hash) { if (location.hash === hash) route(); else location.hash = hash; }
+
+function route() {
+  clearTimers();
+  S.err = null;
+  var r = parseHash();
+  /* keep polling when the route is still the change whose run is in progress */
+  if (S.progress && !(r.name === 'change' && r.key === S.progress.change_key)) { stopPoll(); S.progress = null; }
+  var changed = (r.name !== S.route.name) || (r.key !== S.route.key);
+  S.route = r;
+  if (changed) { S.openLink = {}; S.openSig = {}; S.openHunk = {}; S.openFile = {}; S.verify = null; S.checked = null; }
+  document.getElementById('nav-changes').className = (r.name === 'ledger') ? '' : 'on';
+  document.getElementById('nav-ledger').className = (r.name === 'ledger') ? 'on' : '';
+  if (r.name === 'ledger') { ensureLedger(); render(); return; }
+  if (r.name === 'change') { ensureGate(); ensureRun(r.key); render(); return; }
+  ensureGate(); ensureChanges(); render();
+}
+
+/* ---------------- loaders ---------------- */
+function ensureChanges(force) {
+  if (S.changes && !force) return Promise.resolve(S.changes);
+  return api('/changes').then(function (rows) {
+    S.changes = Array.isArray(rows) ? rows : [];
+    render();
+    return S.changes;
+  }).catch(function (e) { S.changes = []; fail(e); });
+}
+function ensureGate() {
+  if (S.gate) return Promise.resolve(S.gate);
+  return api('/config/gate').then(function (g) {
+    S.gate = g || {};
+    if (S.thr === null) S.thr = (typeof S.gate.threshold === 'number') ? S.gate.threshold : 45;
+    render();
+    return S.gate;
+  }).catch(function () { S.gate = {}; if (S.thr === null) S.thr = 45; render(); });
+}
+function ensureRun(key, force) {
+  if (S.runKey === key && S.run && !force) return Promise.resolve(S.run);
+  S.run = null; S.runs = []; S.runKey = key;
+  api('/changes/' + encodeURIComponent(key)).then(function (run) {
+    if (S.runKey !== key) return;
+    S.run = run;
+    if (!S.revealed[key] && !S.progress) startReveal(key, run);
+    render();
+  }).catch(function (e) {
+    if (S.runKey !== key) return;
+    /* a run still in flight has no stored Run yet; that is not an error */
+    if (S.progress && S.progress.change_key === key) return;
+    fail(e);
+  });
+  api('/changes/' + encodeURIComponent(key) + '/runs').then(function (rs) {
+    if (S.runKey !== key) return;
+    S.runs = Array.isArray(rs) ? rs : []; render();
+  }).catch(function () { });
+  return Promise.resolve(null);
+}
+function ensureLedger(force) {
+  if (S.ledger && !force) return;
+  var q = S.ledgerAgent ? ('?agent_id=' + encodeURIComponent(S.ledgerAgent)) : '';
+  api('/manifest/ledger' + q).then(function (rows) {
+    S.ledger = Array.isArray(rows) ? rows : []; render();
+  }).catch(function (e) { S.ledger = []; fail(e); });
+  api('/sessions').then(function (rows) { S.sessions = Array.isArray(rows) ? rows : []; render(); })
+    .catch(function () { S.sessions = []; });
+}
+
+/* ---------------- run progress: POST /run/{pr} then poll /status every 700ms --- */
+var STAGES = ['collecting', 'correlating', 'deciding', 'recording', 'done'];
+var STAGE_LINKS = { collecting: 2, correlating: 4, deciding: 6, recording: 6, done: 6, error: 6 };
+
+function startRun(pr, repo) {
+  if (!pr) { S.err = 'Enter a pull request number.'; render(); return; }
+  var path = '/run/' + encodeURIComponent(pr) + (repo ? ('?repo=' + encodeURIComponent(repo)) : '');
+  withBusy(api(path, { method: 'POST' })).then(function (res) {
+    if (!res || !res.change_key) throw new Error('POST /run/' + pr + ' returned no change_key');
+    S.progress = { run_id: res.run_id, change_key: res.change_key, stage: 'collecting', message: 'starting…' };
+    S.revealed[res.change_key] = false;
+    S.reveal = 0;
+    go('#/changes/' + encodeURIComponent(res.change_key));
+    startPoll(res.run_id, res.change_key);
+  }).catch(fail);
+}
+function startPoll(runId, key) {
+  stopPoll();
+  S.poll = setInterval(function () {
+    api('/status/' + encodeURIComponent(runId)).then(function (st) {
+      if (!S.progress || S.progress.run_id !== runId) return;
+      S.progress.stage = st && st.stage ? st.stage : 'collecting';
+      S.progress.message = st && st.message ? st.message : '';
+      S.reveal = STAGE_LINKS[S.progress.stage] || 0;
+      if (S.progress.stage === 'done' || S.progress.stage === 'error') {
+        stopPoll();
+        var done = S.progress;
+        S.progress = null;
+        S.revealed[key] = true;
+        S.reveal = 6;
+        if (done.stage === 'error') S.err = 'Run ' + runId + ' ended in error: ' + (done.message || 'no message');
+        ensureRun(key, true);
+        ensureChanges(true);
+      }
+      render();
+    }).catch(function (e) { stopPoll(); S.progress = null; fail(e); });
+  }, 700);
+}
+function stopPoll() { if (S.poll) { clearInterval(S.poll); S.poll = null; } }
+
+/* First open of a change reveals the six links one by one, as the prototype did. */
+function startReveal(key, run) {
+  var links = (run && run.chain && run.chain.links) ? run.chain.links : [];
+  if (!links.length) { S.revealed[key] = true; S.reveal = 6; return; }
+  S.reveal = 0;
+  links.forEach(function (_, i) { at(260 * (i + 1), function () { if (S.runKey !== key) return; S.reveal = i + 1; render(); }); });
+  at(260 * (links.length + 1), function () { if (S.runKey !== key) return; S.revealed[key] = true; S.reveal = 6; render(); });
+}
+
+/* ---------------- threshold (RFC 12: drag previews, release persists) ---------- */
+function onThrDrag(v) { S.thrDrag = Number(v); renderThresholdPreview(); }
+function onThrRelease(v) {
+  var val = Number(v);
+  S.thrDrag = null; S.thr = val;
+  withBusy(api('/config/threshold', { method: 'PUT', body: { threshold: val } })).then(function (rows) {
+    if (Array.isArray(rows) && S.changes) {
+      var byKey = {};
+      rows.forEach(function (r) { byKey[r.change_key] = r; });
+      S.changes.forEach(function (row) {
+        var u = byKey[row.change_key];
+        if (u) { row.decision = u.decision; row.composite = u.composite; }
+      });
+      if (S.run && byKey[S.run.change_key] && S.run.decision) {
+        S.run.decision.decision = byKey[S.run.change_key].decision;
+        S.run.decision.composite = byKey[S.run.change_key].composite;
+      }
+    }
+    if (S.gate) S.gate.threshold = val;
+    if (S.run && S.run.decision) S.run.decision.threshold = val;
+    render();
+  }).catch(fail);
+}
+function effThreshold() { return S.thrDrag !== null ? S.thrDrag : (S.thr === null ? 45 : S.thr); }
+/* preview rule from RFC 12: HOLD if composite > value OR any hard stop fired */
+function previewHold(composite, hardStops) {
+  if (hardStops && hardStops.length) return true;
+  return (typeof composite === 'number') && composite > effThreshold();
+}
+
+/* ---------------- Docket ON / OFF ---------------- */
+function setDocket(on) {
+  S.on = on;
+  var t = document.getElementById('tog');
+  t.className = 'tog' + (on ? ' on' : '');
+  document.getElementById('togl').textContent = 'DOCKET ' + (on ? 'ON' : 'OFF');
+  if (!on && (S.tab === 'docket' || S.tab === 'diff' || S.tab === 'sessions')) S.tab = 'planning';
+  if (!on && S.route.name === 'ledger') { go('#/changes'); return; }
+  if (!on && S.route.name === 'change' && S.run && filedByDocket(S.run.change_key)) { go('#/changes'); return; }
+  render();
+}
+function filedByDocket(key) {
+  var row = (S.changes || []).filter(function (r) { return r.change_key === key; })[0];
+  if (row) return !!row.filed_by_docket;
+  return !!(S.run && S.run.record && S.run.record.kind && S.run.record.kind !== 'code');
+}
+
+/* ---------------- demo controls ---------------- */
+function seed(reset) {
+  withBusy(api(reset ? '/demo/reset' : '/demo/seed', { method: 'POST' })).then(function () {
+    S.changes = null; S.run = null; S.runKey = null; S.revealed = {}; S.ledger = null;
+    go('#/changes'); ensureChanges(true); render();
+  }).catch(fail);
+}
+
+/* ============================== RENDER ======================================== */
+function render() {
+  var body = document.getElementById('body');
+  clear(body);
+  if (S.err) {
+    var e = add(body, h('div', 'errbar'));
+    txt(e, 'span', null, S.err);
+    add(e, btn('dismiss', 'btn sm', function () { S.err = null; render(); })).style.marginLeft = '10px';
+  }
+  if (S.route.name === 'ledger') return renderLedger(body);
+  if (S.route.name === 'change') return renderChange(body);
+  return renderList(body);
+}
+
+/* ---------------- screen 1: changes list ---------------- */
+function renderList(body) {
+  var rows = S.changes;
+  if (rows === null) { add(body, h('div', 'absent', 'Loading changes from GET /changes…')); return; }
+
+  var visible = rows.filter(function (r) { return S.on || !r.filed_by_docket; });
+  var filed = rows.filter(function (r) { return r.filed_by_docket; }).length;
+
+  if (!S.on) {
+    add(body, h('div', 'offbar', 'Docket is off. This is the board you have today — ' + filed +
+      ' change' + (filed === 1 ? '' : 's') + ' ' + (filed === 1 ? 'has' : 'have') +
+      ' vanished from the queue, because no ITSM tool files a record for a model version bump, a prompt edit, a tool grant or a knowledge edit. They are live in production regardless.'));
+  }
+
+  /* run box + demo controls (RFC 12: "Run box", "seed demo") */
+  var rb = add(body, h('div', 'runbox'));
+  txt(rb, 'h3', null, 'Run Docket');
+  var pr = add(rb, h('input', 'pr')); pr.placeholder = 'PR number'; pr.id = 'prinput';
+  var repo = add(rb, h('input', 'repo')); repo.placeholder = 'owner/name (optional)'; repo.id = 'repoinput';
+  var tokIn = add(rb, h('input', 'repo')); tokIn.type = 'password'; tokIn.id = 'apitoken';
+  tokIn.placeholder = 'API token (if set)'; tokIn.autocomplete = 'off'; tokIn.value = apiToken();
+  tokIn.title = 'DOCKET_API_TOKEN, only needed when the server sets one. Kept for this tab only.';
+  tokIn.addEventListener('change', function () { setApiToken(tokIn.value.trim()); });
+  add(rb, btn('Run', 'btn pri', function () { setApiToken(tokIn.value.trim()); startRun(pr.value.trim(), repo.value.trim()); }));
+  add(rb, btn('Seed demo', 'btn', function () { seed(false); }));
+  add(rb, btn('Reset', 'btn', function () { seed(true); }));
+  add(rb, btn('Refresh', 'btn', function () { ensureChanges(true); }));
+  txt(rb, 'span', 'stat', S.busy ? 'working…' : (MOCK ? 'mock data (?mock=1)' : 'POST /run/{pr} · POST /demo/seed'));
+
+  S.listRows = visible;
+  if (S.on) add(body, thresholdPanel(null));
+
+  var head = add(body, h('div', 'head'));
+  txt(head, 'h1', null, 'Changes');
+  add(head, h('span', 'view', 'Awaiting CAB review ▾'));
+  var count = add(head, h('span', 'view', visible.length + ' change' + (visible.length === 1 ? '' : 's')));
+  count.style.marginLeft = 'auto';
+
+  var tbl = add(body, h('div', 'tbl'));
+  var th = add(tbl, h('div', 'th' + (S.on ? '' : ' off')));
+  txt(th, 'span', null, 'Subject');
+  txt(th, 'span', null, 'Status');
+  if (S.on) { txt(th, 'span', null, 'Decision'); txt(th, 'span', null, 'Risk'); }
+  txt(th, 'span', null, 'Updated');
+  if (S.on) txt(th, 'span', null, 'Score');
+
+  if (!visible.length) add(tbl, h('div', 'absent', 'No changes. Press "Seed demo" to load the seeded cases (RFC section 14).'));
+
+  visible.forEach(function (r) { add(tbl, listRow(r)); });
+
+  if (S.on && filed) {
+    add(body, h('div', 'callout', (filed === 1 ? 'The row marked FILED BY DOCKET exists' : 'The ' + filed + ' rows marked FILED BY DOCKET exist') +
+      ' only because Docket filed them. A model version bump, a prompt edit, a tool-scope grant or a knowledge edit produces no change record in any ITSM tool today, yet each alters production agent behaviour the moment it lands.'));
+  }
+  add(body, h('p', 'hint', 'Open any change. Toggle DOCKET off at the top to see the same board without it.'));
+}
+
+function listRow(r) {
+  var tr = h('div', 'tr' + (S.on && r.filed_by_docket ? ' flag' : '') + (S.on ? '' : ' off'));
+  tr.addEventListener('click', function () { go('#/changes/' + encodeURIComponent(r.change_key)); });
+
+  var left = add(tr, h('div'));
+  var idline = add(left, h('div', 'id'));
+  txt(idline, 'span', null, r.change_key || '(no key)');
+  txt(left, 'div', 'sub', has(r.title) ? r.title : '(untitled change)');
+  var meta = add(left, h('div', 'meta rowwrap'));
+  txt(meta, 'span', null, 'kind ' + (r.kind || 'unknown'));
+  if (S.on) {
+    txt(meta, 'span', null, '· join ' + (r.join_confidence || 'unknown'));
+    txt(meta, 'span', null, '· ' + (typeof r.missing_links === 'number' ? r.missing_links : '?') + ' of 6 links missing');
+  }
+  if (has(r.freshservice_id)) txt(meta, 'span', null, '· FS ' + r.freshservice_id);
+  if (r.simulated) add(meta, chip('SIMULATED', 'c-sim'));
+  if (S.on && r.filed_by_docket) add(meta, chip('FILED BY DOCKET', 'c-new'));
+
+  var st = add(tr, h('span'));
+  add(st, chip(r.filed_by_docket && S.on ? 'AWAITING APPROVAL' : 'AWAITING APPROVAL', 'c-await'));
+
+  if (S.on) {
+    var dcell = add(tr, h('span'));
+    dcell.setAttribute('data-composite', String(r.composite));
+    // renderThresholdPreview() repaints from these attributes while the slider is
+    // dragged, so the row has to carry its hard stops as well as its composite.
+    dcell.setAttribute('data-hardstops', (r.hard_stops && r.hard_stops.length) ? '1' : '0');
+    add(dcell, decisionChip(S.thrDrag !== null ? (previewHold(r.composite, r.hard_stops) ? 'HOLD' : 'APPROVE') : r.decision));
+    add(tr, riskChip(r.risk_level));
+  }
+  txt(tr, 'span', 'dt', when(r.updated_at));
+  if (S.on) txt(tr, 'span', 'dt', num(r.composite) + ' / 100');
+  return tr;
+}
+
+/* ---------------- threshold panel (shared by list and detail) ---------------- */
+function thresholdPanel(run) {
+  var box = h('div', 'thr');
+  txt(box, 'h3', null, 'Risk threshold');
+  txt(box, 'div', 'sub2', 'The gate is configuration, not judgement. Drag it and watch changes reroute. Releasing saves it through PUT /config/threshold.');
+  var range = add(box, h('input'));
+  range.type = 'range'; range.min = '0'; range.max = '100'; range.value = String(effThreshold());
+  range.addEventListener('input', function () { onThrDrag(range.value); });
+  range.addEventListener('change', function () { onThrRelease(range.value); });
+  var rowv = add(box, h('div', 'rowv'));
+  var l = add(rowv, h('span')); txt(l, 'span', null, 'threshold '); txt(l, 'b', 'thr-val', effThreshold());
+  var rr = add(rowv, h('span'));
+  if (run && run.decision) { txt(rr, 'span', null, 'this change '); txt(rr, 'b', null, num(run.decision.composite)); }
+  else { txt(rr, 'span', null, (S.listRows || []).length + ' changes on this board'); }
+  var out = add(box, h('div', 'out'));
+  out.id = 'thr-out';
+  paintThrOut(out, run);
+  if (S.gate && has(S.gate.config_hash)) txt(box, 'div', 'sub2 hashline', 'config hash ' + short(S.gate.config_hash, 16));
+  return box;
+}
+function paintThrOut(out, run) {
+  if (run && run.decision) {
+    var held = previewHold(run.decision.composite, run.decision.hard_stops_fired);
+    out.className = 'out ' + (held ? 'board' : 'auto');
+    out.textContent = held ? 'ROUTED TO THE BOARD' : 'AUTO-APPROVED';
+    return;
+  }
+  var rows = S.listRows || [];
+  if (!rows.length) { out.className = 'out'; out.textContent = 'threshold ' + effThreshold() + ' / 100'; return; }
+  var n = (S.thrDrag === null)
+    ? rows.filter(function (r) { return r.decision === 'HOLD'; }).length
+    : rows.filter(function (r) { return previewHold(r.composite, r.hard_stops); }).length;
+  out.className = 'out ' + (n ? 'board' : 'auto');
+  out.textContent = n + ' of ' + rows.length + ' routed to the board';
+}
+function renderThresholdPreview() {
+  var v = effThreshold();
+  Array.prototype.forEach.call(document.querySelectorAll('.thr-val'), function (n) { n.textContent = String(v); });
+  var out = document.getElementById('thr-out');
+  if (out) paintThrOut(out, S.run);
+  Array.prototype.forEach.call(document.querySelectorAll('[data-composite]'), function (cell) {
+    var c = Number(cell.getAttribute('data-composite'));
+    var hs = cell.getAttribute('data-hardstops') === '1';
+    clear(cell);
+    add(cell, decisionChip(previewHold(isNaN(c) ? null : c, hs ? [1] : null) ? 'HOLD' : 'APPROVE'));
+  });
+}
+
+/* ---------------- screen 2: one change ---------------- */
+var LIFE = ['Open', 'Planning', 'Awaiting Approval', 'Pending Release', 'Pending Review', 'Closed'];
+var LINK_ICON = {
+  intent: ['JI', '#0052CC'], session: ['AI', '#6B4EFF'], diff: ['GH', '#1B2A33'],
+  review: ['PR', '#0E8E85'], verify: ['CI', '#0B7A57'], deploy: ['CD', '#9C5B00']
+};
+
+function renderChange(body) {
+  var back = add(body, btn('‹  Back to Changes', 'backbtn', function () { go('#/changes'); }));
+  back.style.display = 'inline-flex';
+
+  if (S.progress) { add(body, progressPanel()); }
+  if (!S.run) {
+    add(body, h('div', 'absent', S.progress ? 'Run in progress — evidence is still being collected.' : 'Loading GET /changes/' + S.route.key + ' …'));
+    return;
+  }
+  var run = S.run, rec = run.record || {};
+
+  var crumb = add(body, h('div', 'crumb'));
+  var cb = add(crumb, h('b', null, 'Changes')); cb.addEventListener('click', function () { go('#/changes'); });
+  txt(crumb, 'span', null, ' / ' + (run.change_key || ''));
+
+  var dh = add(body, h('div', 'dhead'));
+  var dl = add(dh, h('div'));
+  var cid = add(dl, h('div', 'cid rowwrap'));
+  txt(cid, 'span', null, run.change_key || '');
+  txt(cid, 'span', null, '· ' + (rec.kind || 'unknown') + ' · ' + (run.mode || 'live'));
+  if (filedByDocket(run.change_key) && S.on) add(cid, chip('FILED BY DOCKET', 'c-new'));
+  txt(dl, 'h1', null, has(rec.title) ? rec.title : '(untitled change)');
+  if (has(rec.source_url)) {
+    var a = add(dl, h('a', 'cid', rec.source_url));
+    safeHref(a, rec.source_url); a.style.display = 'inline-block'; a.style.marginTop = '4px';
+  }
+  var db = add(dh, h('div', 'dbtn'));
+  add(db, btn('Re-fetch', 'btn', function () { ensureRun(run.change_key, true); }));
+  add(db, btn('Request approval', 'btn pri', function () { S.tab = 'approvals'; render(); }));
+
+  var stage = (run.decision && run.decision.decision === 'APPROVE') ? 3 : 2;
+  var life = add(body, h('div', 'life'));
+  LIFE.forEach(function (s, i) { add(life, h('div', i < stage ? 'done' : (i === stage ? 'on' : ''), s)); });
+
+  var cols = add(body, h('div', 'cols'));
+  var main = add(cols, h('div'));
+  var side = add(cols, h('div'));
+
+  /* tabs */
+  var tabs = add(main, h('div', 'tabs'));
+  function tabBtn(id, label, badge, good) {
+    var b = h('button', S.tab === id ? 'on' : '');
+    b.appendChild(document.createTextNode(label));
+    if (badge !== undefined && badge !== null) {
+      var n = h('span', 'n' + (good ? ' g' : ''), badge);
+      b.appendChild(n);
+    }
+    b.addEventListener('click', function () { S.tab = id; render(); });
+    return add(tabs, b);
+  }
+  tabBtn('planning', 'Planning');
+  tabBtn('approvals', 'Approvals');
+  if (S.on) {
+    var nsig = (run.signals || []).filter(function (s) { return s.status !== 'computed' || s.score >= 50; }).length;
+    tabBtn('docket', 'Docket', nsig ? String(nsig) : '✓', !nsig);
+    tabBtn('diff', 'Diff', ((rec.diff && rec.diff.files) || []).length || '0');
+    tabBtn('sessions', 'Sessions', ((rec.sessions) || []).length || '0');
+  }
+  tabBtn('activities', 'Activities');
+
+  var tb = add(main, h('div', 'tabbody'));
+  if (!S.on && (S.tab === 'docket' || S.tab === 'diff' || S.tab === 'sessions')) S.tab = 'planning';
+  if (S.tab === 'planning') tabPlanning(tb, run);
+  else if (S.tab === 'approvals') tabApprovals(tb, run);
+  else if (S.tab === 'docket') tabDocket(tb, run);
+  else if (S.tab === 'diff') tabDiff(tb, run);
+  else if (S.tab === 'sessions') tabSessions(tb, run);
+  else tabActivities(tb, run);
+
+  /* sidebar */
+  var props = add(side, h('div', 'props'));
+  txt(props, 'h3', null, 'Properties');
+  prop(props, 'Change type', titleCase(rec.kind || 'unknown'));
+  prop(props, 'Status', (run.decision && run.decision.decision === 'APPROVE') ? 'Pending Release' : 'Awaiting Approval');
+  prop(props, 'Created', when(rec.created_at));
+  if (S.on) {
+    prop(props, 'Decision', (run.decision && run.decision.decision) || '—');
+    prop(props, 'Composite', run.decision ? num(run.decision.composite) + ' / 100' : '—');
+    var pr = prop(props, 'Risk', run.decision ? String(run.decision.risk_level || '—').replace('_', ' ') : '—');
+    if (run.decision && (run.decision.risk_level === 'high' || run.decision.risk_level === 'very_high')) pr.className = 'v hi';
+    prop(props, 'Join confidence', (rec.join && rec.join.confidence) || 'unknown');
+    prop(props, 'Unmatched policy', (run.decision && run.decision.unmatched_policy_applied) || 'n/a');
+    prop(props, 'Missing links', run.chain ? String(run.chain.missing_count) + ' of 6' : '—');
+  } else {
+    prop(props, 'Impact', 'Low');
+    prop(props, 'Risk', 'Low');
+  }
+  prop(props, 'Group', 'Platform');
+  if (run.outputs) {
+    prop(props, 'Freshservice', has(run.outputs.freshservice_change_id) ? String(run.outputs.freshservice_change_id) : 'not filed');
+    prop(props, 'FS approval', run.outputs.freshservice_approval || 'none');
+    prop(props, 'GitHub status', has(run.outputs.github_status_state) ? run.outputs.github_status_state : '—');
+  }
+  if (S.on) add(side, thresholdPanel(run));
+
+  if (S.on && S.runs && S.runs.length) {
+    var hbox = add(side, h('div', 'props'));
+    txt(hbox, 'h3', null, 'Run history');
+    S.runs.forEach(function (r) {
+      prop(hbox, short(r.run_id || '(run)', 14), (r.decision || '—') + ' · ' + num(r.composite));
+    });
+  }
+  if (!S.on) {
+    add(side, h('div', 'offbar', 'Docket is off. The risk threshold, the evidence chain, the diff attribution and the agent sessions are not part of this board.'));
+  }
+}
+function prop(parent, k, v) {
+  var row = add(parent, h('div', 'p'));
+  txt(row, 'span', 'k', k);
+  return txt(row, 'span', 'v', v);
+}
+
+function progressPanel() {
+  var box = h('div', 'runbox');
+  txt(box, 'h3', null, 'Run in progress');
+  var bar = add(box, h('div', 'srcbar'));
+  bar.style.flex = '1';
+  txt(bar, 'span', null, (S.progress.stage || '') + (S.progress.message ? ' — ' + S.progress.message : ''));
+  var track = add(bar, h('div', 'track'));
+  var fill = add(track, h('div', 'fill'));
+  var idx = STAGES.indexOf(S.progress.stage);
+  fill.style.width = (((idx < 0 ? 0 : idx + 1) / STAGES.length) * 100) + '%';
+  txt(box, 'span', 'stat', 'GET /status/' + short(S.progress.run_id, 12) + ' every 700 ms');
+  return box;
+}
+
+/* ---------------- what the board sees today (the OFF side of the contrast) ---- */
+function fileAverageCoverage(rec) {
+  var cov = (rec.verify && rec.verify.coverage_by_line) || {};
+  var paths = Object.keys(cov), sum = 0, n = 0;
+  paths.forEach(function (p) {
+    var f = cov[p] || {}, ex = (f.executed || []).length, mi = (f.missing || []).length;
+    if (ex + mi > 0) { sum += ex / (ex + mi); n++; }
+  });
+  return n ? { value: sum / n, files: n } : null;
+}
+function conventionalChecks(parent, run, heading) {
+  var rec = run.record || {};
+  txt(parent, 'div', 'sec-t' + (heading === false ? ' first' : ''), 'Conventional checks — the record a board sees today');
+  var lines = [];
+  if (rec.verify && rec.verify.present) lines.push({ ok: rec.verify.ci_status === 'success', t: 'CI ' + (rec.verify.ci_status || 'unknown') });
+  else lines.push({ ok: false, t: 'No CI run is on file for this change.' });
+  var appr = (rec.review && rec.review.approvers) || [];
+  if (rec.review && rec.review.present && appr.length) {
+    lines.push({ ok: true, t: appr.length + ' approval' + (appr.length === 1 ? '' : 's') + ' — ' + appr.map(function (a) { return a.reviewer; }).join(', ') });
+  } else {
+    lines.push({ ok: false, t: 'No approval: ' + (rec.review && rec.review.present ? 'a pull request exists but nobody approved it.' : 'no pull request and no reviewer exist.') });
+  }
+  var fa = fileAverageCoverage(rec);
+  if (fa) lines.push({ ok: fa.value >= 0.8, t: 'Coverage ' + pct(fa.value) + ' — file average across ' + fa.files + ' file' + (fa.files === 1 ? '' : 's') });
+  else lines.push({ ok: false, t: 'No coverage report was found for this commit.' });
+  lines.push({ ok: true, t: 'No policy violations flagged' });
+
+  lines.forEach(function (l) {
+    var p = add(parent, h('p', 'chk' + (l.ok ? '' : ' bad')));
+    p.textContent = (l.ok ? '✓ ' : '✕ ') + l.t;
+    p.style.margin = '0';
+  });
+  if (rec.verify) addProv(parent, rec.verify);
+  var allPassed = lines.every(function (l) { return l.ok; });
+  add(parent, h('p', 'note3', allPassed
+    ? (S.on
+      ? 'Every gate this change had to pass, passed. Docket starts here.'
+      : 'This is the whole record. The file average above is the number a board is given; nothing here says how much of the AI-authored code it covers.')
+    : 'This change had almost nothing for a board to check \u2014 which is exactly why it never reached one.'));
+}
+
+/* ---------------- tab: Planning (reason / impact / rollout / backout) --------- */
+function tabPlanning(tb, run) {
+  var rec = run.record || {}, bo = run.backout || {};
+  fld(tb, 'Reason for change', (rec.intent && rec.intent.present && has(rec.intent.text))
+    ? rec.intent.text
+    : null, 'No requirement, ticket or issue is on record for this change.', rec.intent);
+  fld(tb, 'Change impact', (rec.deploy && rec.deploy.present)
+    ? ((rec.deploy.target || 'unstated target') + (rec.deploy.window ? ' · window ' + rec.deploy.window : ''))
+    : null, 'Unassessed — no deployment target or window is on record.', rec.deploy);
+  fld(tb, 'Rollout plan', has(run.rollout_text) ? run.rollout_text : null, 'No rollout text was produced for this run.');
+
+  /* Backout: the bad plan, why it fails, the fix (RFC 12 + 9.8) */
+  var wrap = add(tb, h('div', 'fld'));
+  txt(wrap, 'label', null, 'Backout plan');
+  if (!S.on) {
+    add(wrap, h('div', 'box', has(bo.naive_plan) ? bo.naive_plan : (has(bo.text) ? bo.text : 'No backout plan is on file.')));
+    add(tb, h('p', 'note2', 'Rollout and backout plans are mandatory in Freshservice — ITIL requires them and the fields cannot be hidden. So every AI-authored change already carries a backout plan. For an agent change, the one people write is wrong, and nothing here can tell you that.'));
+    conventionalChecks(tb, run);
+    return;
+  }
+  if (has(bo.naive_plan)) {
+    add(wrap, h('div', 'box bad', bo.naive_plan));
+    if (has(bo.why_naive_fails)) add(wrap, h('p', 'wrong', '✕ Docket: ' + bo.why_naive_fails));
+  } else {
+    add(wrap, h('div', 'box bad', '— empty —'));
+    add(wrap, h('p', 'wrong', '✕ Docket: ' + (has(bo.why_naive_fails) ? bo.why_naive_fails : 'no backout plan exists, because no change record existed. ITIL requires one.')));
+  }
+  if (bo.available && (bo.steps || []).length) {
+    var fix = add(wrap, h('div', 'box fixed'));
+    txt(fix, 'div', null, has(bo.summary) ? bo.summary : 'Restore the previous agent bundle.');
+    var kv = add(fix, h('div', 'kv'));
+    bo.steps.forEach(function (st) {
+      txt(kv, 'div', 'k', st.key);
+      txt(kv, 'div', 'v', (has(st.from_value) ? st.from_value : '—') + '  →  ' + (has(st.to_value) ? st.to_value : '—'));
+    });
+    add(wrap, h('p', 'right', '✓ Backout plan rewritten by Docket as an agent version, not a commit.'));
+  } else {
+    add(wrap, h('div', 'absent bad', has(bo.text) ? bo.text : 'No backout is available: Docket has no earlier bundle on record for this agent.'));
+  }
+  if (has(bo.text)) {
+    var ft = add(tb, h('div', 'fld'));
+    txt(ft, 'label', null, 'Backout text written to Freshservice');
+    add(ft, h('div', 'box', bo.text));
+  }
+  add(tb, h('p', 'note2', 'Rollout and backout plans are mandatory in Freshservice — ITIL requires them and the fields cannot be hidden. So every AI-authored change already carries a backout plan. For agent changes, the one people write is wrong.'));
+}
+function fld(tb, label, value, absentText, section) {
+  var w = add(tb, h('div', 'fld'));
+  var lab = add(w, h('label'));
+  lab.appendChild(document.createTextNode(label));
+  if (section) { var b = provBadge(section); if (b) { b.style.marginLeft = '8px'; lab.appendChild(b); } }
+  if (has(value)) add(w, h('div', 'box', value));
+  else add(w, h('div', 'absent', absentText));
+  return w;
+}
+
+/* ---------------- tab: Approvals ---------------- */
+function tabApprovals(tb, run) {
+  var rec = run.record || {}, rev = rec.review || {};
+  var appr = rev.approvers || [];
+  if (!rev.present) {
+    var a0 = add(tb, h('div', 'appr'));
+    a0.style.borderStyle = 'dashed';
+    txt(a0, 'div', 'g', 'No approval was ever requested');
+    txt(a0, 'div', 'm', 'There is no pull request and no reviewer. This change did not exist as a record until Docket filed it.');
+  } else if (!appr.length) {
+    var a1 = add(tb, h('div', 'appr'));
+    txt(a1, 'div', 'g', 'A pull request exists, but nobody has approved it');
+    txt(a1, 'div', 'm', rev.comments + ' comment' + (rev.comments === 1 ? '' : 's') + ' · ' + rev.files_changed + ' files changed');
+  } else {
+    var a2 = add(tb, h('div', 'appr'));
+    txt(a2, 'div', 'g', 'Change Planning CAB');
+    addProv(a2, rev);
+    appr.forEach(function (ap) {
+      txt(a2, 'div', 'm', '✓ ' + ap.reviewer + ' approved ' + when(ap.approved_at) +
+        ' · at most ' + fmtSecs(ap.ask_to_approve_s) + ' with the change open · commit ' + short(ap.approved_commit, 10));
+    });
+    txt(a2, 'div', 'm', rev.comments + ' comment' + (rev.comments === 1 ? '' : 's') +
+      ' on ' + (rev.files_commented || []).length + ' of ' + rev.files_changed + ' files');
+    if (rev.stale_approval) txt(a2, 'div', 'm', '⚠ stale approval: the code changed after it was approved');
+  }
+  if (S.on && run.decision) {
+    var held = previewHold(run.decision.composite, run.decision.hard_stops_fired);
+    var b = add(tb, h('div', 'appr'));
+    b.style.borderColor = held ? 'var(--warn)' : 'var(--pass)';
+    b.style.background = held ? '#FDFAF5' : '#F6FBF9';
+    txt(b, 'div', 'g', held ? 'Technical CAB — requested by Docket' : 'No board approval required');
+    txt(b, 'div', 'm', held
+      ? 'Triggered automatically · composite ' + num(run.decision.composite) + ' against threshold ' + effThreshold() +
+      ((run.decision.hard_stops_fired || []).length ? ' · ' + run.decision.hard_stops_fired.length + ' hard stop(s) fired' : '')
+      : 'composite ' + num(run.decision.composite) + ' is below threshold ' + effThreshold() + ' · auto-approved with evidence on file');
+  }
+  var row = add(tb, h('div', 'rowwrap'));
+  row.style.marginTop = '12px';
+  add(row, btn('Sync approval from Freshservice', 'btn', function () {
+    withBusy(api('/changes/' + encodeURIComponent(run.change_key) + '/sync', { method: 'POST' })).then(function (out) {
+      if (out) run.outputs = out; render();
+    }).catch(fail);
+  }));
+  if (run.outputs && has(run.outputs.freshservice_url)) {
+    var link = add(row, h('a', 'cid', 'open in Freshservice'));
+    safeHref(link, run.outputs.freshservice_url);
+  }
+  if (run.outputs && (run.outputs.errors || []).length) {
+    var e = add(tb, h('div', 'absent bad'));
+    txt(e, 'div', null, 'Writer errors recorded on this run:');
+    run.outputs.errors.forEach(function (msg) { txt(e, 'div', null, '· ' + msg); });
+  }
+  add(tb, h('p', 'note2', S.on
+    ? 'Docket routes a second approval only when computed risk crosses the configured threshold — and attaches the evidence, so the board is not asked to re-investigate.'
+    : 'Without Docket there is one approval group, and the evidence behind it is whatever the reviewers happened to look at.'));
+}
+function fmtSecs(s) {
+  if (typeof s !== 'number' || !isFinite(s)) return '—';
+  var m = Math.floor(s / 60), r = s % 60;
+  return m ? (m + 'm ' + r + 's') : (r + 's');
+}
+
+/* ---------------- tab: Activities ---------------- */
+function tabActivities(tb, run) {
+  var rec = run.record || {};
+  actRow(tb, when(rec.created_at), filedByDocket(run.change_key) ? 'System' : 'Platform team',
+    filedByDocket(run.change_key) ? 'change auto-filed by Docket' : 'created this change');
+  if (!S.on) {
+    add(tb, h('p', 'note2', 'With Docket off, the history contains no record of what the agent did.'));
+    return;
+  }
+  actRow(tb, when(run.created_at), 'Docket', 'assembled the evidence chain — ' +
+    (6 - ((run.chain && run.chain.missing_count) || 0)) + ' of 6 links present', true);
+  (run.signals || []).forEach(function (s) {
+    actRow(tb, when(run.created_at), 'Docket', 'scored ' + s.label + ' ' + num(s.score) + ' (' + s.status + ')', true);
+  });
+  if (run.decision) {
+    actRow(tb, when(run.created_at), 'Docket', 'composite ' + num(run.decision.composite) +
+      ' against threshold ' + num(run.decision.threshold, 0) + ' → ' + run.decision.decision, true);
+    (run.decision.hard_stops_fired || []).forEach(function (hs) {
+      actRow(tb, when(run.created_at), 'Docket', 'hard stop ' + hs.id + ' — ' + hs.reason, true);
+    });
+  }
+  if (has(run.seal)) actRow(tb, when(run.created_at), 'Docket', 'sealed the run ' + short(run.seal, 16), true);
+}
+function actRow(tb, time, who, what, dk) {
+  var r = add(tb, h('div', 'act' + (dk ? ' dk' : '')));
+  txt(r, 'span', 't', time);
+  var s = add(r, h('span'));
+  txt(s, 'b', null, who);
+  s.appendChild(document.createTextNode(' ' + what));
+}
+
+/* ---------------- tab: Docket (chain, signals, verdict, brief, seal) ---------- */
+function tabDocket(tb, run) {
+  var rec = run.record || {};
+  var links = (run.chain && run.chain.links) || [];
+  var revealCount = S.progress ? S.reveal : (S.revealed[run.change_key] ? 6 : S.reveal);
+
+  txt(tb, 'div', 'sec-t first', 'Assembled provenance — six links');
+  if (revealCount < links.length) {
+    var bar = add(tb, h('div', 'srcbar'));
+    txt(bar, 'span', null, revealCount === 0 ? 'Connecting…' : ('Connecting… ' + revealCount + ' of ' + links.length + ' links'));
+    var track = add(bar, h('div', 'track'));
+    add(track, h('div', 'fill')).style.width = ((revealCount / Math.max(links.length, 1)) * 100) + '%';
+  }
+  if (!links.length) add(tb, h('div', 'absent', 'This run carries no evidence chain.'));
+  links.forEach(function (link, i) { renderLink(tb, link, i, i >= revealCount); });
+  if (run.chain && typeof run.chain.missing_count === 'number') {
+    add(tb, h('p', 'note3', run.chain.missing_count === 0
+      ? 'All six links are present.'
+      : run.chain.missing_count + ' of 6 links are MISSING. A link is present or missing, never partly present.'));
+  }
+
+  conventionalChecks(tb, run);
+
+  /* four signal cards */
+  txt(tb, 'div', 'sec-t', 'Docket risk signals — tap any signal for its evidence');
+  var sigs = run.signals || [];
+  if (!sigs.length) add(tb, h('div', 'absent', 'This run carries no signals.'));
+  sigs.forEach(function (sg, i) { renderSignal(tb, sg, i); });
+
+  /* verdict + hard stops */
+  if (run.decision) add(tb, verdictPanel(run));
+  else add(tb, h('div', 'absent bad', 'This run carries no decision.'));
+
+  /* rehearsal (no-code kinds) */
+  renderRehearsal(tb, rec);
+
+  /* board brief */
+  renderBrief(tb, run);
+
+  /* seal */
+  renderSeal(tb, run);
+}
+
+function renderLink(parent, link, i, pending) {
+  var icon = LINK_ICON[link.name] || ['·', '#8892A0'];
+  var miss = !link.present;
+  var row = add(parent, h('div', 'hk' + (pending ? ' pending' : '') + (miss && !pending ? ' miss' : '')));
+  var ic = add(row, h('span', 'ic', icon[0]));
+  ic.style.background = icon[1];
+  txt(row, 'span', 'l', String(link.name || '').toUpperCase());
+  txt(row, 'span', 'v', pending ? '—' : (has(link.summary) ? link.summary : '(no summary)'));
+  add(row, h('span', 's ' + (pending ? 'wait' : (miss ? 'none' : 'got')), pending ? '…' : (miss ? 'MISSING' : 'GOT')));
+  if (pending) return;
+  row.addEventListener('click', function () { S.openLink[i] = !S.openLink[i]; render(); });
+  if (!S.openLink[i]) return;
+  var exp = add(parent, h('div', 'exp' + (miss ? ' miss' : '')));
+  exp.textContent = has(link.detail) ? link.detail : (miss ? 'Nothing was found for this link.' : 'No further detail was recorded.');
+  if ((link.evidence_refs || []).length) {
+    var refs = add(parent, h('div', 'exp'));
+    refs.textContent = 'evidence: ' + link.evidence_refs.join(', ');
+  }
+}
+
+function renderSignal(parent, sg, i) {
+  var cls = 'sig';
+  if (sg.status === 'degraded') cls += ' degraded';
+  else if (sg.status === 'not_computable') cls += ' notcomp';
+  else if (typeof sg.score === 'number' && sg.score < 25) cls += ' calm';
+  var row = add(parent, h('div', cls));
+  row.addEventListener('click', function () { S.openSig[i] = !S.openSig[i]; render(); });
+  var left = add(row, h('div'));
+  var nline = add(left, h('div', 'n rowwrap'));
+  txt(nline, 'span', null, String(sg.label || sg.signal || 'signal').toUpperCase());
+  if (sg.status === 'degraded') add(nline, chip('DEGRADED', 'c-med'));
+  if (sg.status === 'not_computable') add(nline, chip('NOT COMPUTABLE', 'c-mut'));
+  txt(left, 'div', 'd', has(sg.summary) ? sg.summary : '(no summary)');
+  var right = add(row, h('div'));
+  txt(right, 'div', 'val', has(sg.headline) ? sg.headline : '—');
+  txt(right, 'div', 'sc2', sg.status === 'not_computable'
+    ? 'score not computable'
+    : 'score ' + num(sg.score) + ' / 100');
+  if (!S.openSig[i]) return;
+
+  var ev = sg.evidence || [];
+  if (!ev.length) { add(parent, h('div', 'absent', 'No evidence items were attached to this signal.')); return; }
+  ev.forEach(function (item) {
+    var box = add(parent, h('div', 'exp'));
+    var head = add(box, h('div', 'rowwrap'));
+    txt(head, 'span', null, '[' + (item.kind || 'note') + ' · ' + (item.source || '?') + ' · ' + (item.id || '') + ']');
+    var b = provBadge(item); if (b) add(head, b);
+    txt(box, 'div', null, has(item.text) ? item.text : '(no text)');
+    var data = item.data || {};
+    var keys = Object.keys(data);
+    if (keys.length) {
+      var kv = add(box, h('div', 'kv'));
+      keys.forEach(function (k) {
+        txt(kv, 'div', 'k', k);
+        var v = data[k];
+        txt(kv, 'div', 'v', (v && typeof v === 'object') ? JSON.stringify(v) : String(v));
+      });
+    }
+  });
+  if (sg.status === 'not_computable') {
+    add(parent, h('div', 'absent bad',
+      'Docket could not compute this signal. The gate substitutes the not-computable score, so turning telemetry off never makes a change easier to approve.'));
+  } else if (sg.status === 'degraded') {
+    add(parent, h('div', 'absent',
+      'This signal ran on weaker evidence than it wants: part of its input is missing or simulated. The gate applies the degraded floor.'));
+  }
+}
+
+function verdictPanel(run) {
+  var d = run.decision;
+  var held = previewHold(d.composite, d.hard_stops_fired);
+  var color = held ? '#B72D48' : '#0B7A57';
+  var box = h('div', 'verdict' + (held ? '' : ' ok'));
+  var top = add(box, h('div', 'vtop'));
+  add(top, gauge(d.composite, color));
+  var right = add(top, h('div'));
+  txt(right, 'div', 'w', held ? 'HELD' : 'CLEARED');
+  var p = add(right, h('p'));
+  p.textContent = held
+    ? ('Composite ' + num(d.composite) + ' against a threshold of ' + effThreshold() +
+      ((d.hard_stops_fired || []).length ? ', and ' + d.hard_stops_fired.length + ' hard stop' + (d.hard_stops_fired.length === 1 ? '' : 's') + ' fired.' : '.') +
+      '\nThe board still decides. Docket only makes sure it decides on evidence.')
+    : ('Composite ' + num(d.composite) + ' sits below your threshold of ' + effThreshold() + '.\nAuto-approved with the evidence on file.');
+  var sc = add(box, h('div', 'sc'));
+  sc.textContent = 'composite ' + num(d.composite) + ' / 100 · threshold ' + effThreshold() +
+    ' · risk ' + String(d.risk_level || '—').replace('_', ' ') +
+    ' · policy ' + (d.unmatched_policy_applied || 'n/a') +
+    (has(d.config_hash) ? ' · config ' + short(d.config_hash, 12) : '');
+
+  if ((d.hard_stops_fired || []).length) {
+    var hs = add(box, h('div', 'hs'));
+    txt(hs, 'div', 'sc', 'HARD STOPS FIRED');
+    d.hard_stops_fired.forEach(function (x) {
+      var r = add(hs, h('div', 'row'));
+      txt(r, 'b', null, x.id || 'HS?');
+      txt(r, 'span', null, has(x.reason) ? x.reason : '(no reason recorded)');
+    });
+  }
+  var wu = d.weights_used || {};
+  var wk = Object.keys(wu);
+  if (wk.length) {
+    var w = add(box, h('div', 'sc'));
+    w.textContent = 'weights ' + wk.map(function (k) { return k + ' ' + wu[k]; }).join(' · ');
+  }
+  if ((d.excluded_signals || []).length) {
+    add(box, h('div', 'sc', 'excluded signals: ' + d.excluded_signals.join(', ')));
+  }
+  return box;
+}
+function gauge(score, color) {
+  var r = 32, circ = 2 * Math.PI * r;
+  var s = typeof score === 'number' ? Math.max(0, Math.min(100, score)) : 0;
+  var svg = svgEl('svg', { class: 'gauge', viewBox: '0 0 76 76', width: 76, height: 76 });
+  svg.appendChild(svgEl('circle', { cx: 38, cy: 38, r: r, fill: 'none', stroke: 'var(--panel-2)', 'stroke-width': 7 }));
+  var ring = svgEl('circle', {
+    cx: 38, cy: 38, r: r, fill: 'none', stroke: color, 'stroke-width': 7, 'stroke-linecap': 'round',
+    'stroke-dasharray': circ.toFixed(1), 'stroke-dashoffset': circ.toFixed(1), transform: 'rotate(-90 38 38)'
+  });
+  svg.appendChild(ring);
+  var t1 = svgEl('text', { x: 38, y: 34, 'text-anchor': 'middle', 'font-family': 'var(--mono)', 'font-size': 17, 'font-weight': 700, fill: color });
+  t1.textContent = String(Math.round(s));
+  svg.appendChild(t1);
+  var t2 = svgEl('text', { x: 38, y: 48, 'text-anchor': 'middle', 'font-family': 'var(--mono)', 'font-size': 7.5, 'letter-spacing': '.08em', fill: 'var(--muted)' });
+  t2.textContent = '/ 100';
+  svg.appendChild(t2);
+  requestAnimationFrame(function () {
+    requestAnimationFrame(function () { ring.style.strokeDashoffset = (circ * (1 - s / 100)).toFixed(1); });
+  });
+  return svg;
+}
+
+function renderRehearsal(tb, rec) {
+  var v = rec.verify || {};
+  var rh = v.rehearsal;
+  if (!rh) {
+    if (rec.kind && rec.kind !== 'code') {
+      txt(tb, 'div', 'sec-t', 'Rehearsal');
+      add(tb, h('div', 'absent bad', 'Nothing rehearsed how this agent behaves after the change. There is no diff and no replay — the board has nothing to look at.'));
+    }
+    return;
+  }
+  var t = add(tb, h('div', 'sec-t rowwrap'));
+  txt(t, 'span', null, 'Rehearsal — ' + rh.cases + ' resolved cases replayed');
+  var b = provBadge(rh); if (b) add(t, b);
+  var grid = add(tb, h('div', 'rep'));
+  var reg = rh.regressed || 0, chg = rh.changed_acceptable || 0;
+  for (var i = 0; i < (rh.cases || 0); i++) {
+    var cls = 'p';
+    if (i < reg) cls = 'r'; else if (i < reg + chg) cls = 'c';
+    add(grid, h('i', cls));
+  }
+  var lg = add(tb, h('div', 'replg'));
+  txt(lg, 'span', null, '■ ' + (rh.identical || 0) + ' identical');
+  txt(lg, 'span', null, '■ ' + chg + ' changed, acceptable');
+  txt(lg, 'span', null, '■ ' + reg + ' regressed');
+  if ((rh.regressions || []).length) {
+    var kv = add(tb, h('div', 'kv'));
+    rh.regressions.forEach(function (r) {
+      txt(kv, 'div', 'k', r.case_id);
+      txt(kv, 'div', 'v', (r.before || '—') + '  →  ' + (r.after || '—'));
+    });
+  }
+  add(tb, h('p', 'note2', 'There is no diff to review, so Docket produces one — the behavioural difference across cases where the right answer is already known. The resolved ticket is the label.'));
+}
+
+function renderBrief(tb, run) {
+  txt(tb, 'div', 'sec-t', 'Board brief');
+  var box = add(tb, h('div', 'brief'));
+  /* The heading text below is fixed by RFC section 12 and must not vary. */
+  txt(box, 'h4', null, 'Advisory, written by AI. Not part of the decision.');
+  var adv = run.advisory || [];
+  if (!adv.length) {
+    add(box, h('div', 'absent', 'No advisory was written for this run.'));
+    return;
+  }
+  adv.forEach(function (a) {
+    var p = add(box, h('p'));
+    p.textContent = has(a.text) ? a.text : '(empty advisory)';
+    var src = add(box, h('div', 'src'));
+    src.textContent = (a.kind || 'note') + ' · ' + (a.source || '?') + (has(a.model) ? ' · ' + a.model : '') +
+      ((a.evidence_refs || []).length ? ' · cites ' + a.evidence_refs.join(', ') : '');
+  });
+  add(box, h('div', 'src', 'Written after the seal. Never read by decide/.'));
+}
+
+function renderSeal(tb, run) {
+  txt(tb, 'div', 'sec-t', 'Seal');
+  var box = add(tb, h('div', 'seal'));
+  txt(box, 'span', null, 'seal');
+  txt(box, 'span', 'hashv', has(run.seal) ? run.seal : 'this run carries no seal');
+  add(box, btn('Verify', 'btn sm', function () {
+    withBusy(api('/changes/' + encodeURIComponent(run.change_key) + '/verify')).then(function (r) {
+      S.verify = r || { match: false, seal: '' }; render();
+    }).catch(fail);
+  }));
+  if (S.verify) {
+    var ok = !!S.verify.match;
+    var res = add(box, h('span', 'chip ' + (ok ? 'c-ok' : 'c-high'), ok ? 'MATCH' : 'MISMATCH'));
+    res.style.marginLeft = '4px';
+    txt(box, 'span', 'hashv', 'recomputed ' + (has(S.verify.seal) ? S.verify.seal : '(none)'));
+  }
+}
+
+/* ---------------- sensitive lists: from config, else from the signal's evidence */
+function sensitiveCfg(run) {
+  var g = S.gate || {};
+  var blk = g.sensitive || {};
+  /* slice(): the fallback below pushes, and must never mutate the cached gate config */
+  var paths = (blk.paths || g.sensitive_paths || []).slice();
+  var tools = (blk.tools || g.sensitive_tools || []).slice();
+  var bash = (blk.bash_patterns || g.sensitive_bash_patterns || []).slice();
+  if (!tools.length && run) {                       /* last resort, see A2 */
+    var br = (run.signals || []).filter(function (s) { return s.signal === 'blast_radius'; })[0];
+    if (br) (br.evidence || []).forEach(function (it) {
+      var d = it.data || {};
+      ['tool', 'tools', 'display_name', 'name', 'pattern', 'matched'].forEach(function (k) {
+        var v = d[k];
+        if (typeof v === 'string') tools.push(v);
+        else if (Array.isArray(v)) v.forEach(function (x) { if (typeof x === 'string') tools.push(x); });
+      });
+    });
+  }
+  return { paths: paths, tools: tools, bash: bash };
+}
+function isSensitiveTool(name, cfg) {
+  if (!name) return false;
+  for (var i = 0; i < cfg.tools.length; i++) {
+    var p = cfg.tools[i];
+    if (p === name) return true;
+    try { if (globRe(p).test(name)) return true; } catch (e) { }
+  }
+  return false;
+}
+function isSensitiveBash(cmd, cfg) {
+  if (!cmd) return false;
+  for (var i = 0; i < cfg.bash.length; i++) {
+    try { if (new RegExp(cfg.bash[i]).test(cmd)) return true; } catch (e) { if (cmd.indexOf(cfg.bash[i]) >= 0) return true; }
+  }
+  return false;
+}
+
+/* ---------------- tab: Diff (v3) ---------------- */
+function tabDiff(tb, run) {
+  var rec = run.record || {}, d = rec.diff || {};
+  var t = add(tb, h('div', 'sec-t first rowwrap'));
+  txt(t, 'span', null, 'Diff');
+  var b = provBadge(d); if (b) add(t, b);
+  if (!d.present) {
+    add(tb, h('div', 'absent bad', 'No diff exists for this change. There is nothing for a board to read — which is exactly why a change like this files no record today.'));
+    return;
+  }
+  var files = d.files || [];
+  var totals = d.totals || {};
+  var scope = (rec.intent && rec.intent.scope_paths) || [];
+  var cov = (rec.verify && rec.verify.coverage_by_line) || {};
+  var abl = d.attribution_by_line || {};
+  var hattr = {};
+  (d.hunk_attribution || []).forEach(function (ha) { hattr[ha.hunk_id] = ha; });
+
+  var sum = add(tb, h('div', 'kv'));
+  txt(sum, 'div', 'k', 'lines added'); txt(sum, 'div', 'v', String(d.lines_added || 0));
+  txt(sum, 'div', 'k', 'attribution');
+  txt(sum, 'div', 'v', ['ai', 'mixed', 'human', 'unknown'].map(function (k) { return k + ' ' + (totals[k] || 0); }).join(' · '));
+  txt(sum, 'div', 'k', 'intent scope');
+  txt(sum, 'div', 'v', scope.length ? scope.join(', ') : 'no scope declared on the requirement');
+  if (!Object.keys(cov).length) { txt(sum, 'div', 'k', 'coverage'); txt(sum, 'div', 'v', 'no line-level coverage was found for this commit'); }
+
+  if (!files.length) { add(tb, h('div', 'absent', 'The diff is present but carries no files.')); return; }
+
+  files.forEach(function (f, fi) { add(tb, diffFile(f, fi, scope, cov, abl, hattr, rec)); });
+
+  var lg = add(tb, h('div', 'legend'));
+  [['ai', 'AI-authored'], ['mixed', 'mixed'], ['human', 'human'], ['unknown', 'unknown']].forEach(function (p) {
+    var s = add(lg, h('span'));
+    var i = add(s, h('i')); i.style.background = 'var(--' + p[0] + ')';
+    s.appendChild(document.createTextNode('left gutter · ' + p[1]));
+  });
+  var c1 = add(lg, h('span')); add(c1, h('i')).style.background = 'var(--pass)';
+  c1.appendChild(document.createTextNode('second gutter · covered by a test'));
+  var c2 = add(lg, h('span')); add(c2, h('i')).style.background = 'var(--fail)';
+  c2.appendChild(document.createTextNode('second gutter · not covered'));
+  var c3 = add(lg, h('span')); add(c3, h('i')).style.background = 'var(--panel-2)';
+  c3.appendChild(document.createTextNode('second gutter · no coverage data'));
+}
+
+function diffFile(f, fi, scope, cov, abl, hattr, rec) {
+  var box = h('div', 'dfile');
+  var fh = add(box, h('div', 'fh'));
+  var open = S.openFile[fi] !== false;
+  var toggle = add(fh, h('span', 'pth', f.path || '(no path)'));
+  toggle.style.cursor = 'pointer';
+  toggle.addEventListener('click', function () { S.openFile[fi] = !open; render(); });
+  txt(fh, 'span', 'cnt', (f.status || 'modified') + ' · +' + (f.additions || 0) + ' −' + (f.deletions || 0));
+  var outOfScope = scope.length ? !matchesAny(f.path, scope) : false;
+  if (outOfScope) add(fh, h('span', 'tag', 'OUT OF SCOPE'));
+  if (!scope.length) add(fh, h('span', 'tag', 'NO SCOPE DECLARED'));
+  if (!f.patch_present) add(fh, h('span', 'tag', 'PATCH NOT AVAILABLE'));
+  if (!open) return box;
+
+  if (!f.patch_present) {
+    add(box, h('div', 'absent', 'GitHub omitted the patch for this file, so Docket has no lines to attribute here.'));
+    return box;
+  }
+  var hunks = f.hunks || [];
+  if (!hunks.length) { add(box, h('div', 'absent', 'No hunks were recorded for this file.')); return box; }
+  var lineAttr = abl[f.path] || {};
+  var fileCov = cov[f.path] || null;
+  var exec = {}, miss = {};
+  if (fileCov) {
+    (fileCov.executed || []).forEach(function (n) { exec[n] = 1; });
+    (fileCov.missing || []).forEach(function (n) { miss[n] = 1; });
+  }
+  hunks.forEach(function (hk, hi) {
+    var w = add(box, h('div', 'hunk'));
+    var hh = add(w, h('div', 'hh'));
+    var key = hk.hunk_id || (f.path + '#' + hi);
+    txt(hh, 'span', null, '@@ -' + hk.old_start + ',' + hk.old_lines + ' +' + hk.new_start + ',' + hk.new_lines + ' @@');
+    txt(hh, 'span', null, (hk.added || []).length + ' added · ' + (hk.removed_count || 0) + ' removed');
+    var ha = hattr[key];
+    if (ha) add(hh, chip(String(ha.label || 'unknown').toUpperCase(), ha.label === 'ai' ? 'c-high' : (ha.label === 'human' ? 'c-low' : 'c-med')));
+    txt(hh, 'span', null, S.openHunk[key] ? '▾ who wrote this' : '▸ who wrote this');
+    hh.addEventListener('click', function () { S.openHunk[key] = !S.openHunk[key]; render(); });
+
+    if (S.openHunk[key]) add(w, hunkProvenance(ha, rec));
+
+    (hk.added || []).forEach(function (ln) {
+      var row = add(w, h('div', 'dline'));
+      var a = lineAttr[String(ln.line_no)] || lineAttr[ln.line_no] || 'unknown';
+      var g1 = add(row, h('span', 'g1 ' + (['ai', 'mixed', 'human', 'unknown'].indexOf(a) >= 0 ? a : 'unknown')));
+      g1.title = 'attribution: ' + a;
+      var covCls = fileCov ? (exec[ln.line_no] ? 'cov' : (miss[ln.line_no] ? 'unc' : 'none')) : 'none';
+      var g2 = add(row, h('span', 'g2 ' + covCls));
+      g2.title = covCls === 'cov' ? 'covered by a test' : (covCls === 'unc' ? 'not covered' : 'no coverage data for this line');
+      txt(row, 'span', 'ln', ln.line_no);
+      txt(row, 'span', 'tx', '+ ' + (ln.text === null || ln.text === undefined ? '' : ln.text));
+    });
+  });
+  return box;
+}
+
+function hunkProvenance(ha, rec) {
+  var box = h('div', 'exp');
+  if (!ha) { box.textContent = 'No turn could be attributed to this hunk.'; return box; }
+  var lines = [];
+  lines.push('label      ' + (ha.label || 'unknown'));
+  var counts = ha.counts || {};
+  var ck = Object.keys(counts);
+  if (ck.length) lines.push('lines      ' + ck.map(function (k) { return k + ' ' + counts[k]; }).join(' · '));
+  lines.push('session    ' + (has(ha.session_id) ? ha.session_id : 'none'));
+  lines.push('turn       ' + (has(ha.prompt_id) ? ha.prompt_id : 'none'));
+  box.textContent = lines.join('\n');
+  var ex = promptExcerptFor(ha, rec);
+  var t = h('div', 'turn');
+  var lab = add(t, h('span', 'tn', 'prompt that wrote most of this hunk'));
+  t.appendChild(document.createTextNode(ex === null ? 'The prompt text for this turn was not captured.' : ex));
+  var wrap = document.createElement('div');
+  wrap.appendChild(box); wrap.appendChild(t);
+  return wrap;
+}
+/* Assumption A1: prompt_id is "{session_id}-p{N}", N being the 1-based turn. */
+function promptExcerptFor(ha, rec) {
+  if (!ha || !has(ha.prompt_id)) return null;
+  var sess = (rec.sessions || []).filter(function (s) { return s.session_id === ha.session_id; })[0];
+  if (!sess) return null;
+  var ex = sess.prompt_excerpts || [];
+  var m = /-p(\d+)$/.exec(String(ha.prompt_id));
+  if (m) { var i = parseInt(m[1], 10) - 1; if (i >= 0 && i < ex.length) return ex[i]; }
+  return null;
+}
+
+/* ---------------- tab: Sessions (v3) ---------------- */
+function tabSessions(tb, run) {
+  var rec = run.record || {}, cfg = sensitiveCfg(run);
+  var jo = rec.join || {};
+  var t = add(tb, h('div', 'sec-t first'), 'Join');
+  t.textContent = 'Join';
+  var kv = add(tb, h('div', 'kv'));
+  txt(kv, 'div', 'k', 'method'); txt(kv, 'div', 'v', jo.method || 'none');
+  txt(kv, 'div', 'k', 'confidence'); txt(kv, 'div', 'v', jo.confidence || 'unmatched');
+  txt(kv, 'div', 'k', 'human declared'); txt(kv, 'div', 'v', jo.human_declared ? 'yes — the PR carries the human-authored label' : 'no');
+  if ((jo.notes || []).length) { txt(kv, 'div', 'k', 'notes'); txt(kv, 'div', 'v', jo.notes.join('\n')); }
+
+  var sessions = rec.sessions || [];
+  if (!sessions.length) {
+    add(tb, h('div', 'absent bad', 'No agent session was found for this change. Docket cannot say which lines an agent wrote, so the signals that need attribution are not computable and the gate penalises rather than excuses that.'));
+    return;
+  }
+  sessions.forEach(function (s) { add(tb, sessionCard(s, rec, cfg)); });
+}
+
+function sessionCard(s, rec, cfg) {
+  var ghost = !s.present;
+  var box = h('div', 'sess' + (ghost ? ' ghost' : ''));
+  var head = add(box, h('div', 'rowwrap'));
+  txt(head, 'h4', null, (s.agent || 'unknown agent') + ' · ' + (s.session_id || '(no id)'));
+  add(head, chip(String(s.join_confidence || 'unmatched').toUpperCase(), s.join_confidence === 'verified' ? 'c-ok' : (s.join_confidence === 'unmatched' ? 'c-high' : 'c-med')));
+  add(head, chip('JOIN ' + String(s.join_method || 'none').toUpperCase(), 'c-mut'));
+  var b = provBadge(s); if (b) add(head, b);
+  if (ghost) add(head, chip('GHOST SESSION', 'c-new'));
+
+  if (ghost) {
+    var notes = (rec.join && rec.join.notes) || [];
+    add(box, h('div', 'absent bad', notes.length
+      ? notes.join('\n')
+      : 'A session was seen but could not be joined to this change, and no note was recorded.'));
+    return box;
+  }
+
+  var kv = add(box, h('div', 'kv'));
+  txt(kv, 'div', 'k', 'model'); txt(kv, 'div', 'v', s.model || 'unknown');
+  txt(kv, 'div', 'k', 'turns / retries'); txt(kv, 'div', 'v', (s.turns || 0) + ' turns · ' + (s.retries || 0) + ' retries');
+  txt(kv, 'div', 'k', 'lines'); txt(kv, 'div', 'v', (s.lines_written || 0) + ' written · ' + (s.lines_discarded || 0) + ' discarded');
+  txt(kv, 'div', 'k', 'files written'); txt(kv, 'div', 'v', (s.files_written || []).length ? s.files_written.join('\n') : 'none recorded');
+  txt(kv, 'div', 'k', 'files discarded'); txt(kv, 'div', 'v', (s.files_discarded || []).length ? s.files_discarded.join('\n') : 'none');
+  txt(kv, 'div', 'k', 'permission modes'); txt(kv, 'div', 'v', (s.permission_modes || []).length ? s.permission_modes.join(' → ') : 'none recorded');
+  txt(kv, 'div', 'k', 'sandbox disabled'); txt(kv, 'div', 'v', (s.sandbox_disabled_calls || 0) + ' call(s)');
+  txt(kv, 'div', 'k', 'matched commits'); txt(kv, 'div', 'v', (s.matched_commits || []).length ? s.matched_commits.map(function (c) { return short(c, 12); }).join(', ') : 'none');
+  if (s.detail) {
+    txt(kv, 'div', 'k', 'detail captured');
+    txt(kv, 'div', 'v', ['prompts', 'tool_details', 'edits'].map(function (k) { return k + ' ' + (s.detail[k] ? 'yes' : 'no'); }).join(' · '));
+  }
+
+  /* approvals_by bar */
+  var ab = s.approvals_by || {};
+  var rule = ab.rule || 0, hook = ab.hook || 0, human = ab.human || 0, tot = rule + hook + human;
+  txt(box, 'div', 'sec-t', 'Who approved this agent’s tool calls');
+  if (!tot) {
+    add(box, h('div', 'absent', 'No approval decisions were recorded for this session.'));
+  } else {
+    var bar = add(box, h('div', 'bar'));
+    add(bar, h('div', 'rule')).style.width = (100 * rule / tot) + '%';
+    add(bar, h('div', 'hook')).style.width = (100 * hook / tot) + '%';
+    add(bar, h('div', 'human')).style.width = (100 * human / tot) + '%';
+    txt(box, 'div', 'note3', 'rule ' + rule + ' · hook ' + hook + ' · human ' + human + ' of ' + tot + ' decisions');
+  }
+
+  /* turns with prompt excerpts */
+  txt(box, 'div', 'sec-t', 'Turns');
+  var ex = s.prompt_excerpts || [];
+  if (!ex.length) {
+    add(box, h('div', 'absent', s.detail && s.detail.prompts === false
+      ? 'Prompt text never arrived for this session, so the turns cannot be shown.'
+      : 'No prompt excerpts were captured for this session.'));
+  } else {
+    ex.forEach(function (e, i) {
+      var t = add(box, h('div', 'turn'));
+      txt(t, 'span', 'tn', 'turn ' + (i + 1) + ' · ' + (s.session_id || '') + '-p' + (i + 1));
+      t.appendChild(document.createTextNode(e));
+    });
+  }
+
+  /* tool calls, sensitive ones highlighted */
+  var tools = s.tools_used || [];
+  txt(box, 'div', 'sec-t', 'Tool calls (' + tools.length + ')');
+  if (!tools.length) {
+    add(box, h('div', 'absent', 'No tool calls were captured. Without OTEL_LOG_TOOL_DETAILS the blast-radius signal can only look at paths.'));
+  } else {
+    var list = add(box, h('div', 'tools'));
+    tools.forEach(function (tc) {
+      var name = tc.display_name || tc.name || '(tool)';
+      var sens = isSensitiveTool(name, cfg) || isSensitiveBash(tc.bash_command, cfg);
+      var row = add(list, h('div', 't' + (sens ? ' sens' : '')));
+      var n = add(row, h('span'));
+      n.textContent = name;
+      if (sens) n.textContent = '⚠ ' + name;
+      txt(row, 'span', 'arg', tc.bash_command || tc.file_path || (tc.mcp_server ? tc.mcp_server + '.' + (tc.mcp_tool || '') : '—'));
+      txt(row, 'span', 'arg', (tc.success ? 'ok' : 'failed') + ' · ' + (tc.decision_source || 'unknown') + (tc.sandbox_disabled ? ' · sandbox off' : ''));
+    });
+  }
+  return box;
+}
+
+/* ---------------- screen 3: manifest ledger ---------------- */
+function renderLedger(body) {
+  var head = add(body, h('div', 'head'));
+  txt(head, 'h1', null, 'Agent manifest ledger');
+
+  var rb = add(body, h('div', 'runbox'));
+  txt(rb, 'h3', null, 'Watcher');
+  var ai = add(rb, h('input', 'agent'));
+  ai.placeholder = 'agent_id (optional filter)';
+  ai.value = S.ledgerAgent;
+  ai.addEventListener('change', function () { S.ledgerAgent = ai.value.trim(); S.ledger = null; ensureLedger(true); });
+  add(rb, btn('Filter', 'btn', function () { S.ledgerAgent = ai.value.trim(); S.ledger = null; ensureLedger(true); }));
+  add(rb, btn('Check now', 'btn pri', function () {
+    withBusy(api('/manifest/check', { method: 'POST' })).then(function (rows) {
+      S.checked = Array.isArray(rows) ? rows : [];
+      S.ledger = null; S.changes = null; ensureLedger(true); ensureChanges(true); render();
+    }).catch(fail);
+  }));
+  txt(rb, 'span', 'stat', 'GET /manifest/ledger · POST /manifest/check');
+
+  if (S.checked) {
+    var c = add(body, h('div', 'offbar'));
+    if (!S.checked.length) c.textContent = 'The watcher ran and found no manifest change.';
+    else {
+      c.textContent = 'The watcher filed ' + S.checked.length + ' change' + (S.checked.length === 1 ? '' : 's') + ':';
+      S.checked.forEach(function (r) {
+        var l = add(c, h('div'));
+        var a = add(l, h('b', null, r.change_key));
+        a.style.cursor = 'pointer';
+        a.addEventListener('click', function () { go('#/changes/' + encodeURIComponent(r.change_key)); });
+        l.appendChild(document.createTextNode(' · run ' + short(r.run_id, 14)));
+      });
+    }
+  }
+
+  if (S.ledger === null) { add(body, h('div', 'absent', 'Loading GET /manifest/ledger …')); return; }
+  if (!S.ledger.length) { add(body, h('div', 'absent', 'No manifest snapshot has been observed yet. Press "Check now" or seed the demo.')); }
+
+  var rows = S.ledger.slice().sort(function (a, b) {
+    var ta = new Date(a.observed_at).getTime() || 0, tb2 = new Date(b.observed_at).getTime() || 0;
+    if (tb2 !== ta) return tb2 - ta;
+    return (b.sequence || 0) - (a.sequence || 0);
+  });
+  rows.forEach(function (sn) { add(body, ledgerCard(sn)); });
+
+  if (S.sessions && S.sessions.length) {
+    txt(body, 'div', 'sec-t', 'Agent sessions seen (GET /sessions)');
+    var tbl = add(body, h('div', 'tbl'));
+    S.sessions.forEach(function (ss) {
+      var r = add(tbl, h('div', 'tr'));
+      r.style.cursor = 'default';
+      var l = add(r, h('div'));
+      txt(l, 'div', 'id', ss.session_id || '(no id)');
+      txt(l, 'div', 'meta', (ss.repo_url || 'no repo url') + ' · ' + (ss.events || 0) + ' events · ' + (ss.edits || 0) + ' edits');
+      txt(r, 'span', 'dt', when(ss.started_at));
+      txt(r, 'span', 'dt', when(ss.ended_at));
+      txt(r, 'span', 'dt', '');
+      txt(r, 'span', 'dt', '');
+    });
+  }
+}
+function ledgerCard(sn) {
+  var box = h('div', 'ledg');
+  var lh = add(box, h('div', 'lh'));
+  txt(lh, 'span', 'sq', '#' + (sn.sequence === undefined ? '?' : sn.sequence));
+  txt(lh, 'span', 'ag', sn.agent_id || '(no agent id)');
+  txt(lh, 'span', 'dt', when(sn.observed_at));
+  txt(lh, 'span', 'dt', 'hash ' + short(sn.manifest_hash, 16));
+  var m = sn.manifest;
+  if (!m) { add(box, h('div', 'absent', 'This snapshot carries no manifest body.')); return box; }
+  var kv = add(box, h('div', 'kv'));
+  txt(kv, 'div', 'k', 'model'); txt(kv, 'div', 'v', m.model || '—');
+  txt(kv, 'div', 'k', 'prompt');
+  txt(kv, 'div', 'v', (m.prompt && (m.prompt.path || '(inline)')) + ' · ' + short((m.prompt && m.prompt.sha256) || '', 16));
+  txt(kv, 'div', 'k', 'tools'); txt(kv, 'div', 'v', (m.tools || []).length ? m.tools.join(', ') : 'none');
+  txt(kv, 'div', 'k', 'permissions'); txt(kv, 'div', 'v', (m.permissions || []).length ? m.permissions.join(', ') : 'none');
+  txt(kv, 'div', 'k', 'knowledge');
+  txt(kv, 'div', 'v', (m.knowledge || []).length ? m.knowledge.map(function (k) { return k.id + ' r' + k.revision; }).join(', ') : 'none');
+  txt(kv, 'div', 'k', 'workflows'); txt(kv, 'div', 'v', (m.workflows || []).length ? m.workflows.join(', ') : 'none');
+  txt(kv, 'div', 'k', 'change ref'); txt(kv, 'div', 'v', has(m.change_ref) ? m.change_ref : 'none — nothing asked for this');
+  return box;
+}
+
+/* ---------------- boot ---------------- */
+function boot() {
+  document.getElementById('tog').addEventListener('click', function () { setDocket(!S.on); });
+  document.getElementById('newbtn').addEventListener('click', function () { go('#/changes'); });
+  document.getElementById('reseed').addEventListener('click', function () { seed(false); });
+  document.getElementById('footmode').textContent = MOCK ? 'mock data (?mock=1) — no network' : 'live API';
+  window.addEventListener('hashchange', route);
+  if (!location.hash) location.hash = '#/changes';
+  route();
+}
+
+/* ============================================================================
+   Dev harness: ?mock=1 serves a bundled DEMO instead of fetching. The shapes are
+   copied from backend/tests/fixtures/build_fixtures.py (held / cleared /
+   model-bump / unmatched) so the renderer is exercised against true data,
+   including the no-code case where four of six chain links are missing.
+   ========================================================================== */
+var DEMO = null;
+
+function aiLine(path, i) { return 'line_' + path + '_' + i + ' = compute(' + i + ')'; }
+function humanLine(i) { return 'assert guard_' + i + '(ctx) is not None  # hand-written'; }
+
+function buildDiff(specs, sessionId) {
+  var files = [], abl = {}, hattr = [], totals = { ai: 0, human: 0, mixed: 0, unknown: 0 }, added = 0, hi = 0;
+  specs.forEach(function (sp) {
+    var path = sp.path, line = 12, hunks = [], lines = {};
+    sp.hunks.forEach(function (hk, k) {
+      var n = hk[0], label = hk[1];
+      var id = path + '#' + k, arr = [], counts = {};
+      for (var j = 0; j < n; j++) {
+        var no = line + j;
+        arr.push({ line_no: no, text: label === 'human' ? humanLine(no) : aiLine(path, no) });
+        lines[String(no)] = label;
+        totals[label] = (totals[label] || 0) + 1;
+        counts[label] = (counts[label] || 0) + 1;
+        added++;
+      }
+      hunks.push({
+        hunk_id: id, path: path, old_start: Math.max(1, line - 3), old_lines: 3,
+        new_start: line, new_lines: n + 3, added: arr, removed_count: k === 0 ? 1 : 0
+      });
+      hattr.push({
+        hunk_id: id, label: label, counts: counts,
+        session_id: label === 'human' ? null : sessionId,
+        prompt_id: label === 'human' ? null : (sessionId + '-p' + ((hi % 5) + 1))
+      });
+      hi++;
+      line += n + 6;
+    });
+    abl[path] = lines;
+    files.push({
+      path: path, status: 'modified', additions: sp.hunks.reduce(function (a, x) { return a + x[0]; }, 0),
+      deletions: 1, patch_present: sp.patch_present !== false, hunks: hunks
+    });
+  });
+  return {
+    present: true, files: files, lines_added: added, attribution_by_line: abl,
+    hunk_attribution: hattr, totals: totals, provenance: 'simulated'
+  };
+}
+/* Coverage shaped so the file average is high while AI-line coverage is not. */
+function buildCoverage(diff, aiCoverRatio, humanCoverRatio, fileAvgTarget) {
+  var cov = {};
+  diff.files.forEach(function (f) {
+    var attr = diff.attribution_by_line[f.path] || {};
+    var executed = [], missing = [], A = 0, C = 0;
+    f.hunks.forEach(function (hk) {
+      hk.added.forEach(function (ln, idx) {
+        var a = attr[String(ln.line_no)] || 'unknown';
+        var ratio = (a === 'human') ? humanCoverRatio : aiCoverRatio;
+        A++;
+        if ((idx % 100) / 100 < ratio) { executed.push(ln.line_no); C++; } else { missing.push(ln.line_no); }
+      });
+    });
+    var P = Math.max(0, Math.round((fileAvgTarget * A - C) / (1 - fileAvgTarget)));
+    for (var i = 1; i <= P; i++) executed.push(10000 + i);            /* pre-existing covered lines */
+    executed.sort(function (a, b) { return a - b; });
+    cov[f.path] = { executed: executed, missing: missing };
+  });
+  return cov;
+}
+function mkTools(sessionId, n) {
+  var out = [], names = ['Read', 'Edit', 'Bash', 'Grep', 'Write'];
+  for (var i = 0; i < n; i++) {
+    var sensitive = (i % 15 === 0);
+    var isBash = (i % 7 === 3);
+    out.push({
+      tool_use_id: sessionId + '-call-' + i,
+      prompt_id: sessionId + '-p' + ((i % 5) + 1),
+      name: sensitive ? 'mcp_tool' : (isBash ? 'Bash' : names[i % names.length]),
+      display_name: sensitive ? 'entitlement_svc.grant' : (isBash ? 'Bash' : names[i % names.length]),
+      mcp_server: sensitive ? 'entitlement_svc' : null,
+      mcp_tool: sensitive ? 'grant' : null,
+      bash_command: isBash ? (i === 3 ? 'kubectl rollout restart deploy/provisioning' : 'pytest -q tests/test_sync.py') : null,
+      file_path: (!sensitive && !isBash) ? 'provisioning/sync.py' : null,
+      success: true, duration_ms: 120, decision_source: (i % 20 === 0) ? 'user_temporary' : 'config',
+      sandbox_disabled: false, git_commit_sha: null, git_branch: null,
+      timestamp: '2026-09-16T09:1' + (i % 10) + ':00Z'
+    });
+  }
+  return out;
+}
+function ev(id, kind, text, data, source) {
+  return { id: id, kind: kind, text: text, data: data || {}, source: source || 'session', provenance: 'simulated' };
+}
+function link(name, present, summary, detail, refs) {
+  return { name: name, present: present, summary: summary, detail: detail || '', evidence_refs: refs || [] };
+}
+
+function buildHeld() {
+  var sid = 'held-session-1';
+  var diff = buildDiff([
+    { path: 'provisioning/sync.py', hunks: [[40, 'ai'], [40, 'ai'], [40, 'ai'], [40, 'ai'], [40, 'ai'], [30, 'ai'], [20, 'ai']] },
+    { path: 'provisioning/backoff.py', hunks: [[32, 'ai'], [40, 'mixed']] },
+    { path: 'entitlement/grants.py', hunks: [[40, 'ai'], [40, 'ai'], [40, 'ai'], [40, 'ai'], [30, 'ai'], [20, 'ai']] },
+    { path: 'cache/reconcile.py', hunks: [[40, 'ai'], [32, 'ai'], [30, 'human'], [28, 'human']] },
+    { path: 'provisioning/config.py', hunks: [[40, 'human'], [40, 'human'], [40, 'human'], [30, 'human']] }
+  ], sid);
+  var cov = buildCoverage(diff, 0.31, 0.95, 0.87);
+  var rec = {
+    schema_version: '3.0', change_key: 'pr-acme-provisioning-service-4471', kind: 'code',
+    title: 'Rework provisioning sync and entitlement grants',
+    source_url: 'https://github.com/acme/provisioning-service/pull/4471',
+    created_at: '2026-09-16T09:00:00Z',
+    intent: {
+      present: true, source: 'github-issue', ref: '#114',
+      url: 'https://github.com/acme/provisioning-service/issues/114',
+      text: 'Provisioning sync retries drop entitlements\n\nProvisioning sync retries drop entitlements when the identity provider answers 429. Add retry with exponential backoff.\n\nScope: provisioning/**',
+      scope_paths: ['provisioning/**'], provenance: 'simulated'
+    },
+    sessions: [{
+      present: true, session_id: sid, agent: 'claude-code', model: 'claude-sonnet-5',
+      turns: 5, retries: 2,
+      files_written: ['provisioning/sync.py', 'provisioning/backoff.py', 'entitlement/grants.py', 'cache/reconcile.py', 'provisioning/config.py'],
+      files_discarded: ['provisioning/legacy_sync.py'], lines_written: 641, lines_discarded: 12,
+      tools_used: mkTools(sid, 46), permission_modes: ['default', 'acceptEdits'],
+      approvals_by: { rule: 44, hook: 0, human: 2 }, sandbox_disabled_calls: 0,
+      prompt_excerpts: [
+        'Fix the provisioning sync so retries do not drop entitlements. See issue 114.',
+        'Add exponential backoff to the sync loop and cover it with tests.',
+        'The grants table also needs the new retry key, update it too.',
+        'Reconcile the cache after a failed grant.',
+        'Run the tests and commit.'
+      ],
+      detail: { prompts: true, tool_details: true, edits: true },
+      join_method: 'sha', join_confidence: 'verified',
+      matched_commits: ['4471a91f3c1d4e5f6a7b8c9d0e1f2a3b4c5d6e7f'], provenance: 'simulated'
+    }, {
+      present: false, session_id: 'held-session-ghost', agent: 'claude-code', model: null,
+      turns: 0, retries: 0, files_written: [], files_discarded: [], lines_written: 0, lines_discarded: 0,
+      tools_used: [], permission_modes: [], approvals_by: {}, sandbox_disabled_calls: 0,
+      prompt_excerpts: [], detail: null, join_method: 'none', join_confidence: 'unmatched',
+      matched_commits: [], provenance: 'simulated'
+    }],
+    join: {
+      method: 'sha', confidence: 'verified', human_declared: false,
+      notes: ['held-session-ghost wrote provisioning/sync.py but no commit carries its trailer and no sha matched; it is reported as a ghost session, not dropped.']
+    },
+    diff: diff,
+    review: {
+      present: true, provenance: 'simulated', stale_approval: false, files_changed: 5,
+      files_commented: [], comments: 0,
+      approvers: [
+        { reviewer: 'rdolan', approved_at: '2026-09-16T09:56:52Z', approved_commit: '4471a91f3c1d4e5f6a7b8c9d0e1f2a3b4c5d6e7f', ask_to_approve_s: 112 },
+        { reviewer: 'mkeane', approved_at: '2026-09-16T09:56:49Z', approved_commit: '4471a91f3c1d4e5f6a7b8c9d0e1f2a3b4c5d6e7f', ask_to_approve_s: 109 }
+      ]
+    },
+    verify: { present: true, ci_status: 'success', coverage_by_line: cov, tests_authored_by: 'ai', rehearsal: null, provenance: 'simulated' },
+    deploy: { present: false, target: null, window: null, provenance: 'simulated' },
+    manifest: { present: false, agent_id: null, changed_keys: [], before: null, after: null, previous_available: false }
+  };
+  var signals = [
+    {
+      signal: 'unattributed', label: 'Unattributed change', score: 55.19, status: 'computed', headline: '340 / 604',
+      summary: '340 of 604 AI-authored lines sit in files the requirement never named.',
+      evidence: [
+        ev('ev:unattributed:1', 'file', 'entitlement/grants.py is outside the declared scope and carries 210 AI lines. Most were written by turn 3.', { path: 'entitlement/grants.py', ai_lines: 210, prompt_id: sid + '-p3' }, 'github'),
+        ev('ev:unattributed:2', 'file', 'cache/reconcile.py is outside the declared scope and carries 72 AI lines.', { path: 'cache/reconcile.py', ai_lines: 72, prompt_id: sid + '-p4' }, 'github'),
+        ev('ev:unattributed:3', 'note', 'The requirement declared its scope as provisioning/** and named retry and backoff only.', { scope_paths: ['provisioning/**'] }, 'github')
+      ]
+    },
+    {
+      signal: 'review_depth', label: 'Review depth', score: 91.24, status: 'computed', headline: '1m 49s',
+      summary: '812 lines were approved after at most 1m 49s with the change open.',
+      evidence: [
+        ev('ev:review_depth:1', 'review', 'mkeane approved 812 added lines at most 109 seconds after being asked.', { reviewer: 'mkeane', ask_to_approve_s: 109, expected_s: 1624 }, 'github'),
+        ev('ev:review_depth:2', 'review', 'rdolan approved at most 112 seconds after being asked.', { reviewer: 'rdolan', ask_to_approve_s: 112 }, 'github'),
+        ev('ev:review_depth:3', 'review', 'No review comment was left on any of the 5 changed files.', { comments: 0, files_changed: 5 }, 'github')
+      ]
+    },
+    {
+      signal: 'untested', label: 'Untested generation', score: 69.00, status: 'degraded', headline: '31%',
+      summary: 'Coverage on AI-authored lines is 31%, against a file average of 87%.',
+      evidence: [
+        ev('ev:untested:1', 'coverage', 'provisioning/sync.py: file average 87%, AI-line coverage 31%.', { path: 'provisioning/sync.py', file_average: 0.87, ai_line_coverage: 0.31 }, 'ci'),
+        ev('ev:untested:2', 'coverage', 'entitlement/grants.py: 145 AI lines are executable and never executed by a test.', { path: 'entitlement/grants.py', uncovered: 145 }, 'ci'),
+        ev('ev:untested:3', 'note', 'The same agent wrote the code and the tests that cover it (self-graded).', { tests_authored_by: 'ai' }, 'session')
+      ]
+    },
+    {
+      signal: 'blast_radius', label: 'Blast radius', score: 65.00, status: 'computed', headline: '3 sensitive',
+      summary: 'The agent called entitlement_svc.grant and changed a file under entitlement/.',
+      evidence: [
+        ev('ev:blast_radius:1', 'tool_call', 'The agent called entitlement_svc.grant 4 times. That tool moves entitlements.', { tool: 'entitlement_svc.grant', calls: 4 }, 'session'),
+        ev('ev:blast_radius:2', 'file', 'entitlement/grants.py matches the sensitive path pattern **/entitlement/**.', { pattern: '**/entitlement/**', path: 'entitlement/grants.py' }, 'github'),
+        ev('ev:blast_radius:3', 'tool_call', 'A Bash call ran "kubectl rollout restart deploy/provisioning".', { pattern: 'kubectl ' }, 'session'),
+        ev('ev:blast_radius:4', 'note', '44 of 46 tool calls were approved by a config rule, not by a person.', { rule: 44, human: 2 }, 'hook')
+      ]
+    }
+  ];
+  return {
+    run_id: 'run-held-001', change_key: rec.change_key, mode: 'replay', created_at: '2026-09-16T10:00:00Z',
+    record: rec, signals: signals,
+    decision: {
+      decision: 'HOLD', composite: 70.11, threshold: 45, risk_level: 'high',
+      weights_used: { unattributed: 0.25, review_depth: 0.25, untested: 0.25, blast_radius: 0.25 },
+      excluded_signals: [],
+      hard_stops_fired: [{ id: 'HS1', reason: 'review_depth scored 91.24, at or above 90' }],
+      unmatched_policy_applied: 'n/a', config_hash: '9f2c41ab77d0e5b6c8a3f1029de44b7c'
+    },
+    chain: {
+      missing_count: 1, links: [
+        link('intent', true, '#114 · "Provisioning sync retries drop entitlements"', 'github-issue #114\nscope: provisioning/**\nno mention of: entitlement grants, cache reconcile', ['ev:unattributed:3']),
+        link('session', true, 'claude-code · 5 turns · 2 retries · 5 files · join verified', 'agent      claude-code\nmodel      claude-sonnet-5\nturns      5 · retries 2\nfiles      5 written · 1 discarded\njoin       sha (verified)\nghost      held-session-ghost could not be joined', ['ev:blast_radius:4']),
+        link('diff', true, 'PR #4471 · 812 lines · 604 AI-authored', '+812 −5 across 5 files\n564 ai · 40 mixed · 208 human\n340 AI lines outside the declared scope', ['ev:unattributed:1']),
+        link('review', true, '2 approvals · fastest 1m 49s', 'rdolan   approved · at most 112s with the change open\nmkeane   approved · at most 109s\ncomments 0 · files commented 0 of 5', ['ev:review_depth:1']),
+        link('verify', true, 'CI success · 31% on AI lines', 'CI       success\ncoverage 87% file average\n         31% on AI-authored lines\ntests    authored by the same agent', ['ev:untested:1']),
+        link('deploy', false, 'no planned window', 'No deployment target and no maintenance window are on record for this change.', [])
+      ]
+    },
+    backout: {
+      available: true, summary: 'Revert PR #4471 and restore the agent bundle that wrote it.',
+      steps: [{ key: 'code', from_value: 'PR #4471 merged', to_value: 'base ref main at 4471a91' }],
+      naive_plan: 'Revert PR #4471 (4471a91)',
+      why_naive_fails: 'Reverting the commit does not change the agent that wrote it: claude-code, model claude-sonnet-5. If the agent’s bundle changed recently, restore that as well.',
+      text: 'Revert PR #4471 (4471a91).\nRestore base ref main.\nConfirm claude-code bundle is unchanged since 2026-09-16.'
+    },
+    rollout_text: 'Merge PR #4471 into main after CAB approval.',
+    seal: 'sha256:0f6b9d1c4a7e2b83d5f0a1c9e7b4d2603f8a1c5e9d7b3a0f6c2e8d4b1a9f7c30',
+    advisory: [
+      { source: 'llm', model: 'claude-sonnet-5', kind: 'brief', text: 'The requirement asked for retry and backoff inside provisioning/. The change also rewrites entitlement grants and cache reconciliation, and the agent called entitlement_svc.grant while doing it. The reviewers had the change open for under two minutes.', evidence_refs: ['ev:unattributed:1', 'ev:blast_radius:1'] },
+      { source: 'llm', model: 'claude-sonnet-5', kind: 'question', text: 'Ask the author why entitlement/grants.py changed, and whether a default role can now be granted where none was returned.', evidence_refs: ['ev:blast_radius:2'] }
+    ],
+    outputs: { freshservice_change_id: 5001, freshservice_url: 'https://yourcompany.freshservice.com/changes/5001', freshservice_approval: 'requested', github_status_state: 'pending', errors: [] }
+  };
+}
+
+function buildCleared() {
+  var sid = 'cleared-session-1';
+  var diff = buildDiff([
+    { path: 'billing/invoice.py', hunks: [[20, 'ai'], [10, 'mixed']] },
+    { path: 'billing/tax.py', hunks: [[16, 'ai']] },
+    { path: 'billing/report.py', hunks: [[10, 'ai'], [8, 'human']] }
+  ], sid);
+  var cov = buildCoverage(diff, 0.95, 0.95, 0.94);
+  var rec = {
+    schema_version: '3.0', change_key: 'pr-acme-provisioning-service-4482', kind: 'code',
+    title: "Round invoice tax to the customer's currency",
+    source_url: 'https://github.com/acme/provisioning-service/pull/4482',
+    created_at: '2026-09-16T09:30:00Z',
+    intent: {
+      present: true, source: 'github-issue', ref: '#131',
+      url: 'https://github.com/acme/provisioning-service/issues/131',
+      text: 'Invoice tax rounds to two decimals in every currency\n\nRound to the currency’s own precision instead.\n\nScope: billing/**',
+      scope_paths: ['billing/**'], provenance: 'simulated'
+    },
+    sessions: [{
+      present: true, session_id: sid, agent: 'claude-code', model: 'claude-sonnet-5', turns: 2, retries: 0,
+      files_written: ['billing/invoice.py', 'billing/tax.py', 'billing/report.py'], files_discarded: [],
+      lines_written: 64, lines_discarded: 0, tools_used: mkTools(sid, 9).map(function (t) {
+        t.display_name = t.display_name === 'entitlement_svc.grant' ? 'Read' : t.display_name;
+        t.name = t.display_name; t.mcp_server = null; t.mcp_tool = null;
+        if (t.bash_command) t.bash_command = 'pytest -q tests/test_tax.py';
+        return t;
+      }),
+      permission_modes: ['default', 'acceptEdits'], approvals_by: { rule: 7, hook: 0, human: 2 },
+      sandbox_disabled_calls: 0,
+      prompt_excerpts: ['Round invoice tax with the currency precision, see issue 131.', 'Add tests for JPY and KWD.'],
+      detail: { prompts: true, tool_details: true, edits: true },
+      join_method: 'sha', join_confidence: 'verified',
+      matched_commits: ['4482a91f3c1d4e5f6a7b8c9d0e1f2a3b4c5d6e7f'], provenance: 'simulated'
+    }],
+    join: { method: 'sha', confidence: 'verified', human_declared: false, notes: [] },
+    diff: diff,
+    review: {
+      present: true, provenance: 'simulated', stale_approval: false, files_changed: 3,
+      files_commented: ['billing/invoice.py', 'billing/tax.py'], comments: 3,
+      approvers: [{ reviewer: 'rdolan', approved_at: '2026-09-16T10:17:00Z', approved_commit: '4482a91f3c1d4e5f6a7b8c9d0e1f2a3b4c5d6e7f', ask_to_approve_s: 1320 }]
+    },
+    verify: { present: true, ci_status: 'success', coverage_by_line: cov, tests_authored_by: 'human', rehearsal: null, provenance: 'simulated' },
+    deploy: { present: true, target: 'production', window: '2026-09-18 02:00 – 03:00', provenance: 'simulated' },
+    manifest: { present: false, agent_id: null, changed_keys: [], before: null, after: null, previous_available: false }
+  };
+  var signals = [
+    { signal: 'unattributed', label: 'Unattributed change', score: 0, status: 'computed', headline: '0 / 50', summary: 'Every AI line sits inside the declared scope billing/**.', evidence: [ev('ev:unattributed:1', 'note', 'All 50 AI-authored lines are in files matching the declared scope billing/**.', { scope_paths: ['billing/**'] }, 'github')] },
+    { signal: 'review_depth', label: 'Review depth', score: 10.00, status: 'computed', headline: '22m 0s', summary: 'One reviewer kept the change open for 22 minutes and left 3 comments.', evidence: [ev('ev:review_depth:1', 'review', 'rdolan had the change open for at most 1320 seconds against an expected 128.', { ask_to_approve_s: 1320, expected_s: 128 }, 'github'), ev('ev:review_depth:2', 'review', '3 comments were left across 2 of 3 changed files.', { comments: 3 }, 'github')] },
+    { signal: 'untested', label: 'Untested generation', score: 5.00, status: 'computed', headline: '95%', summary: '95% of AI-authored lines are executed by a test.', evidence: [ev('ev:untested:1', 'coverage', 'billing/tax.py: file average 94%, AI-line coverage 95%.', { file_average: 0.94, ai_line_coverage: 0.95 }, 'ci')] },
+    { signal: 'blast_radius', label: 'Blast radius', score: 0, status: 'computed', headline: '0 sensitive', summary: 'No sensitive tool, path or shell command was touched.', evidence: [ev('ev:blast_radius:1', 'note', 'No changed file matches a sensitive path and no tool call matches a sensitive tool.', {}, 'config')] }
+  ];
+  return {
+    run_id: 'run-cleared-001', change_key: rec.change_key, mode: 'replay', created_at: '2026-09-16T10:30:00Z',
+    record: rec, signals: signals,
+    decision: { decision: 'APPROVE', composite: 3.75, threshold: 45, risk_level: 'low', weights_used: { unattributed: 0.25, review_depth: 0.25, untested: 0.25, blast_radius: 0.25 }, excluded_signals: [], hard_stops_fired: [], unmatched_policy_applied: 'n/a', config_hash: '9f2c41ab77d0e5b6c8a3f1029de44b7c' },
+    chain: {
+      missing_count: 0, links: [
+        link('intent', true, '#131 · "Invoice tax rounds to two decimals in every"', 'github-issue #131\nscope: billing/**', ['ev:unattributed:1']),
+        link('session', true, 'claude-code · 2 turns · 0 retries · 3 files · join verified', 'agent claude-code · model claude-sonnet-5\njoin sha (verified)', []),
+        link('diff', true, 'PR #4482 · 64 lines · 50 AI-authored', '+64 −3 across 3 files', []),
+        link('review', true, '1 approval · fastest 22m 00s', 'rdolan approved after 22 minutes with 3 comments', ['ev:review_depth:1']),
+        link('verify', true, 'CI success · 95% on AI lines', 'CI success · coverage 94% file average · 95% on AI lines', ['ev:untested:1']),
+        link('deploy', true, 'production · window 2026-09-18 02:00 – 03:00', 'target production\nwindow 2026-09-18 02:00 – 03:00', [])
+      ]
+    },
+    backout: { available: true, summary: 'Revert PR #4482.', steps: [{ key: 'code', from_value: 'PR #4482 merged', to_value: 'base ref main at 4482a91' }], naive_plan: 'Revert PR #4482 (4482a91)', why_naive_fails: 'Reverting the commit does not change the agent that wrote it: claude-code, model claude-sonnet-5. If the agent’s bundle changed recently, restore that as well.', text: 'Revert PR #4482 (4482a91).' },
+    rollout_text: 'Merge PR #4482 into main after CAB approval. Deploy to production in the window 2026-09-18 02:00 – 03:00.',
+    seal: 'sha256:33c1a7e05b9d4f28a6107c3e5b8d90fa24c7e1b6039d8f5a2c4e7b1d0a936f85',
+    advisory: [{ source: 'template', model: null, kind: 'note', text: 'Nothing stands out. The change is in scope, reviewed with comments, and covered.', evidence_refs: [] }],
+    outputs: { freshservice_change_id: 5002, freshservice_url: 'https://yourcompany.freshservice.com/changes/5002', freshservice_approval: 'approved', github_status_state: 'success', errors: [] }
+  };
+}
+
+var MF_BEFORE = {
+  agent_id: 'resolution-agent', manifest_hash: 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+  observed_at: '2026-09-07T09:00:00Z', sequence: 1,
+  manifest: {
+    agent_id: 'resolution-agent', model: 'vendor-4.1',
+    prompt: { path: 'prompts/system.md', sha256: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' },
+    tools: ['kb.search', 'ticket.update'], permissions: ['tickets:write'],
+    knowledge: [{ id: 'kb-2211', revision: '6' }],
+    workflows: ['incident-triage', 'entitlement-provisioning', 'knowledge-retrieval'], change_ref: null
+  }
+};
+var MF_AFTER = JSON.parse(JSON.stringify(MF_BEFORE));
+MF_AFTER.manifest_hash = 'cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc';
+MF_AFTER.observed_at = '2026-09-16T09:00:00Z';
+MF_AFTER.sequence = 2;
+MF_AFTER.manifest.model = 'vendor-4.2';
+
+function buildModelBump() {
+  var rec = {
+    schema_version: '3.0', change_key: 'mf-resolution-agent-cccccccccccc', kind: 'model_version',
+    title: 'resolution-agent: model vendor-4.1 → vendor-4.2', source_url: null,
+    created_at: '2026-09-16T09:00:00Z',
+    intent: { present: false, source: 'manifest-change-ref', ref: null, url: null, text: null, scope_paths: [], provenance: 'simulated' },
+    sessions: [],
+    join: { method: 'none', confidence: 'unmatched', human_declared: false, notes: [] },
+    diff: { present: false, files: [], lines_added: 0, attribution_by_line: {}, hunk_attribution: [], totals: {}, provenance: 'simulated' },
+    review: { present: false, approvers: [], stale_approval: false, files_changed: 0, files_commented: [], comments: 0, provenance: 'simulated' },
+    verify: {
+      present: true, ci_status: 'unknown', coverage_by_line: {}, tests_authored_by: 'unknown', provenance: 'simulated',
+      rehearsal: {
+        agent_id: 'resolution-agent', manifest_hash: MF_AFTER.manifest_hash, cases: 50, identical: 44,
+        changed_acceptable: 4, regressed: 2, provenance: 'simulated',
+        regressions: [{ case_id: 'INC-20114', before: 'escalate', after: 'resolve' }, { case_id: 'INC-20337', before: 'entitlement.check', after: 'ticket.close' }]
+      }
+    },
+    deploy: { present: false, target: null, window: null, provenance: 'simulated' },
+    manifest: { present: true, agent_id: 'resolution-agent', changed_keys: ['model'], before: MF_BEFORE, after: MF_AFTER, previous_available: true }
+  };
+  var signals = [
+    { signal: 'unattributed', label: 'No stated intent', score: 100, status: 'computed', headline: 'none', summary: 'No ticket or requirement asked for this change.', evidence: [ev('ev:unattributed:1', 'manifest', 'No ticket or requirement asked for this change. The vendor released 4.2 and the platform took it.', {}, 'manifest')] },
+    { signal: 'review_depth', label: 'No reviewable artifact', score: 100, status: 'computed', headline: '0 lines', summary: 'There is no pull request, no diff and no reviewer.', evidence: [ev('ev:review_depth:1', 'review', 'No pull request and no reviewer exist for this change.', {}, 'manifest')] },
+    { signal: 'untested', label: 'Unverified behaviour', score: 48.00, status: 'degraded', headline: '2 / 50 regressed', summary: '50 resolved cases were replayed: 44 identical, 4 changed acceptably, 2 regressed.', evidence: [ev('ev:untested:1', 'note', 'INC-20114: the old bundle escalated, the new bundle resolved.', { case_id: 'INC-20114' }, 'manifest'), ev('ev:untested:2', 'note', 'INC-20337: the old bundle checked entitlements, the new bundle closed the ticket.', { case_id: 'INC-20337' }, 'manifest'), ev('ev:untested:3', 'note', 'The rehearsal corpus is the stored 50-case set and is simulated.', { provenance: 'simulated' }, 'manifest')] },
+    { signal: 'blast_radius', label: 'Blast radius', score: 90.00, status: 'computed', headline: '3 workflows', summary: 'Every workflow using resolution-agent changes at once. No canary is possible.', evidence: [ev('ev:blast_radius:1', 'manifest', 'resolution-agent runs in incident-triage, entitlement-provisioning and knowledge-retrieval. All three change at once.', { workflows: ['incident-triage', 'entitlement-provisioning', 'knowledge-retrieval'] }, 'manifest')] }
+  ];
+  return {
+    run_id: 'run-mf-001', change_key: rec.change_key, mode: 'replay', created_at: '2026-09-16T09:05:00Z',
+    record: rec, signals: signals,
+    decision: {
+      decision: 'HOLD', composite: 84.50, threshold: 45, risk_level: 'very_high',
+      weights_used: { unattributed: 0.25, review_depth: 0.25, untested: 0.25, blast_radius: 0.25 },
+      excluded_signals: [], hard_stops_fired: [{ id: 'HS1', reason: 'unattributed scored 100.00, at or above 90' }, { id: 'HS1', reason: 'review_depth scored 100.00, at or above 90' }, { id: 'HS1', reason: 'blast_radius scored 90.00, at or above 90' }],
+      unmatched_policy_applied: 'n/a', config_hash: '9f2c41ab77d0e5b6c8a3f1029de44b7c'
+    },
+    chain: {
+      missing_count: 4, links: [
+        link('intent', false, 'none: no requirement exists', 'No issue, no ticket and no change_ref on the manifest. The vendor released 4.2 and the platform upgraded.', []),
+        link('session', true, 'manifest · model: vendor-4.1 → vendor-4.2', 'agent      resolution-agent\nmodel      vendor-4.1 → vendor-4.2\nprompt     unchanged\ntools      unchanged\nknowledge  unchanged', ['ev:blast_radius:1']),
+        link('diff', false, 'none: nothing to review', 'No code diff exists. There is nothing for a board to read. This is why a change like this files no record today.', []),
+        link('review', false, 'none: no reviewer, no approval', 'No pull request. No reviewer. No approval was requested by anyone.', []),
+        link('verify', true, 'rehearsed · 50 cases · 2 regressed', '50 resolved incidents replayed against vendor-4.2\n 44 identical\n  4 changed, acceptable\n  2 regressed', ['ev:untested:1']),
+        link('deploy', false, 'no planned window · already live across 3 workflows', 'Rolled to production on vendor release. No maintenance window. No rollback plan on file.', [])
+      ]
+    },
+    backout: {
+      available: true, summary: 'Restore agent bundle #2 → #1',
+      steps: [{ key: 'model', from_value: 'vendor-4.2', to_value: 'vendor-4.1' }],
+      naive_plan: null,
+      why_naive_fails: 'no backout plan exists because no change record existed. ITIL requires one.',
+      text: 'Restore agent bundle #2 → #1.\nmodel: vendor-4.2 → vendor-4.1.'
+    },
+    rollout_text: 'Apply bundle #2 to resolution-agent. Affects: incident-triage, entitlement-provisioning, knowledge-retrieval.',
+    seal: 'sha256:a71e30cd8f42b95610d7e3ac5b2f84019d6c3e7b0a5f1d9c8b4e2a760f3d51cb',
+    advisory: [{ source: 'llm', model: 'claude-sonnet-5', kind: 'brief', text: 'There is no diff, so the only evidence of behaviour change is the rehearsal: two of fifty resolved incidents were answered differently, both wrongly. The agent runs in three workflows, so there is no canary.', evidence_refs: ['ev:untested:1', 'ev:blast_radius:1'] }],
+    outputs: { freshservice_change_id: 5003, freshservice_url: 'https://yourcompany.freshservice.com/changes/5003', freshservice_approval: 'requested', github_status_state: null, errors: [] }
+  };
+}
+
+function buildUnmatched() {
+  var diff = buildDiff([
+    { path: 'entitlement/roles.py', hunks: [[20, 'unknown'], [10, 'unknown']] },
+    { path: 'provisioning/hooks.py', hunks: [[30, 'unknown']] }
+  ], 'none');
+  diff.hunk_attribution.forEach(function (ha) { ha.session_id = null; ha.prompt_id = null; ha.label = 'unknown'; });
+  var rec = {
+    schema_version: '3.0', change_key: 'pr-acme-provisioning-service-4600', kind: 'code',
+    title: 'Widen entitlement role lookup',
+    source_url: 'https://github.com/acme/provisioning-service/pull/4600',
+    created_at: '2026-09-16T09:45:00Z',
+    intent: { present: false, source: null, ref: null, url: null, text: null, scope_paths: [], provenance: 'simulated' },
+    sessions: [],
+    join: { method: 'none', confidence: 'unmatched', human_declared: false, notes: ['No agent session could be joined to this pull request, and the PR carries no human-authored label.'] },
+    diff: diff,
+    review: { present: true, provenance: 'simulated', stale_approval: false, files_changed: 2, files_commented: [], comments: 0, approvers: [{ reviewer: 'mkeane', approved_at: '2026-09-16T10:10:00Z', approved_commit: '4600a91f3c1d4e5f6a7b8c9d0e1f2a3b4c5d6e7f', ask_to_approve_s: 900 }] },
+    verify: { present: true, ci_status: 'success', coverage_by_line: {}, tests_authored_by: 'unknown', rehearsal: null, provenance: 'simulated' },
+    deploy: { present: false, target: null, window: null, provenance: 'simulated' },
+    manifest: { present: false, agent_id: null, changed_keys: [], before: null, after: null, previous_available: false }
+  };
+  var signals = [
+    { signal: 'unattributed', label: 'Unattributed change', score: 0, status: 'not_computable', headline: 'not computable', summary: 'Every added line is unknown: no agent session was joined to this change.', evidence: [ev('ev:unattributed:1', 'note', 'No session telemetry was joined to this pull request, so no line can be attributed.', { join_confidence: 'unmatched' }, 'session')] },
+    { signal: 'review_depth', label: 'Review depth', score: 30.00, status: 'computed', headline: '15m 0s', summary: 'One approval after at most 15 minutes, with no comments.', evidence: [ev('ev:review_depth:1', 'review', 'mkeane approved after at most 900 seconds, leaving no comments.', { ask_to_approve_s: 900 }, 'github')] },
+    { signal: 'untested', label: 'Untested generation', score: 0, status: 'not_computable', headline: 'not computable', summary: 'No line-level coverage was found for this commit.', evidence: [ev('ev:untested:1', 'coverage', 'No line-level coverage was found for this commit.', {}, 'ci')] },
+    { signal: 'blast_radius', label: 'Blast radius', score: 25.00, status: 'degraded', headline: '1 sensitive', summary: 'entitlement/roles.py matches a sensitive path. No tool detail arrived, so only paths could be checked.', evidence: [ev('ev:blast_radius:1', 'file', 'entitlement/roles.py matches the sensitive path pattern **/entitlement/**.', { pattern: '**/entitlement/**' }, 'github'), ev('ev:blast_radius:2', 'note', 'No session carried tool details, so only path heuristics were available.', {}, 'session')] }
+  ];
+  return {
+    run_id: 'run-unmatched-001', change_key: rec.change_key, mode: 'replay', created_at: '2026-09-16T10:45:00Z',
+    record: rec, signals: signals,
+    decision: {
+      decision: 'HOLD', composite: 57.50, threshold: 45, risk_level: 'high',
+      weights_used: { unattributed: 0.25, review_depth: 0.25, untested: 0.25, blast_radius: 0.25 }, excluded_signals: [],
+      hard_stops_fired: [{ id: 'HS3', reason: 'the change is unmatched and entitlement/roles.py matches a sensitive path' }],
+      unmatched_policy_applied: 'penalize', config_hash: '9f2c41ab77d0e5b6c8a3f1029de44b7c'
+    },
+    chain: {
+      missing_count: 2, links: [
+        link('intent', false, 'none: no requirement exists', 'No linked issue and no ticket.', []),
+        link('session', false, 'UNMATCHED: no agent session found', 'No session telemetry could be joined to this pull request, and the PR carries no human-authored label.', ['ev:unattributed:1']),
+        link('diff', true, 'PR #4600 · 60 lines · 0 AI-authored', '+60 −2 across 2 files. Every line is unknown.', []),
+        link('review', true, '1 approval · fastest 15m 00s', 'mkeane approved with no comments.', ['ev:review_depth:1']),
+        link('verify', true, 'CI success · coverage not found', 'CI success. No line-level coverage artifact was published.', ['ev:untested:1']),
+        link('deploy', false, 'no planned window', 'No deployment target and no window on record.', [])
+      ]
+    },
+    backout: { available: true, summary: 'Revert PR #4600.', steps: [{ key: 'code', from_value: 'PR #4600 merged', to_value: 'base ref main at 4600a91' }], naive_plan: 'Revert PR #4600 (4600a91)', why_naive_fails: null, text: 'Revert PR #4600 (4600a91).' },
+    rollout_text: 'Merge PR #4600 into main after CAB approval.',
+    seal: 'sha256:5d2f81b0c9a34e7f16b8d0e27c4a95f3061b8e7d2a5c9f04b3e6a1d8c7f20935',
+    advisory: [],
+    outputs: { freshservice_change_id: null, freshservice_url: null, freshservice_approval: 'none', github_status_state: 'pending', errors: ['freshservice writer disabled in config'] }
+  };
+}
+
+function demo() {
+  if (DEMO) return DEMO;
+  var runs = [buildHeld(), buildModelBump(), buildCleared(), buildUnmatched()];
+  DEMO = {
+    threshold: 45,
+    runs: runs,
+    gate: {
+      threshold: 45,
+      weights: { unattributed: 0.25, review_depth: 0.25, untested: 0.25, blast_radius: 0.25 },
+      not_computable_score: 80, degraded_floor: 40, unmatched_policy: 'penalize',
+      human_declared_label: 'docket:human-authored',
+      risk_bands: { low: 25, medium: 50, high: 75 },
+      hard_stops: [{ id: 'HS1', type: 'signal_at_or_above', signal: '*', value: 90 }],
+      sensitive_paths: ['**/auth/**', '**/entitlement/**', '**/migrations/**', '**/*.tf', '.github/workflows/**'],
+      sensitive: {
+        paths: ['**/auth/**', '**/entitlement/**', '**/migrations/**', '**/*.tf', '.github/workflows/**'],
+        tools: ['entitlement_svc.*', '*.grant', '*.delete_*'],
+        bash_patterns: ['terraform apply', 'kubectl ', 'psql ', 'aws iam', 'rm -rf']
+      },
+      config_hash: '9f2c41ab77d0e5b6c8a3f1029de44b7c'
+    },
+    ledger: [MF_BEFORE, MF_AFTER],
+    sessions: [
+      { session_id: 'held-session-1', started_at: '2026-09-16T09:00:00Z', ended_at: '2026-09-16T09:48:00Z', events: 214, edits: 31, repo_url: 'https://github.com/acme/provisioning-service' },
+      { session_id: 'held-session-ghost', started_at: '2026-09-16T08:40:00Z', ended_at: '2026-09-16T08:52:00Z', events: 18, edits: 2, repo_url: null },
+      { session_id: 'cleared-session-1', started_at: '2026-09-16T09:50:00Z', ended_at: '2026-09-16T10:12:00Z', events: 46, edits: 6, repo_url: 'https://github.com/acme/provisioning-service' }
+    ],
+    live: {}
+  };
+  return DEMO;
+}
+function runFor(key) { return demo().runs.filter(function (r) { return r.change_key === key; })[0] || null; }
+function rowFor(run) {
+  return {
+    change_key: run.change_key, title: run.record.title, kind: run.record.kind,
+    decision: run.decision.decision, composite: run.decision.composite, risk_level: run.decision.risk_level,
+    join_confidence: run.record.join.confidence, missing_links: run.chain.missing_count,
+    hard_stops: (run.decision.hard_stops_fired || []).map(function (x) { return x.id; }),
+    filed_by_docket: run.record.kind !== 'code', freshservice_id: run.outputs.freshservice_change_id,
+    updated_at: run.created_at, simulated: true
+  };
+}
+function regateMock(t) {
+  return demo().runs.map(function (r) {
+    var held = r.decision.composite > t || (r.decision.hard_stops_fired || []).length > 0;
+    r.decision.decision = held ? 'HOLD' : 'APPROVE';
+    r.decision.threshold = t;
+    return { change_key: r.change_key, decision: r.decision.decision, composite: r.decision.composite };
+  });
+}
+function mockApi(path, opts) {
+  var m = opts && opts.method ? opts.method : 'GET';
+  var d = demo();
+  var clone = function (v) { return JSON.parse(JSON.stringify(v)); };
+  var body = opts && opts.body;
+  return new Promise(function (resolve, reject) {
+    setTimeout(function () {
+      try {
+        var p = path.split('?')[0];
+        if (p === '/changes' && m === 'GET') return resolve(clone(d.runs.map(rowFor)));
+        var mk = /^\/changes\/([^/]+)(\/(runs|verify|sync))?$/.exec(p);
+        if (mk) {
+          var key = decodeURIComponent(mk[1]), run = runFor(key);
+          if (!run) throw new Error('404 unknown change ' + key);
+          if (!mk[3]) return resolve(clone(run));
+          if (mk[3] === 'runs') return resolve([{ run_id: run.run_id, decision: run.decision.decision, composite: run.decision.composite, created_at: run.created_at }]);
+          if (mk[3] === 'verify') return resolve({ match: true, seal: run.seal });
+          if (mk[3] === 'sync') { run.outputs.freshservice_approval = 'approved'; return resolve(clone(run.outputs)); }
+        }
+        if (p === '/config/gate') { d.gate.threshold = d.threshold; return resolve(clone(d.gate)); }
+        if (p === '/config/threshold' && m === 'PUT') { d.threshold = body.threshold; return resolve(regateMock(body.threshold)); }
+        var rm = /^\/run\/([^/]+)$/.exec(p);
+        if (rm && m === 'POST') {
+          var target = d.runs[0];
+          var id = 'run-live-' + rm[1];
+          d.live[id] = { i: 0, change_key: target.change_key };
+          return resolve({ run_id: id, change_key: target.change_key });
+        }
+        var sm = /^\/status\/([^/]+)$/.exec(p);
+        if (sm) {
+          var st = d.live[decodeURIComponent(sm[1])];
+          if (!st) throw new Error('404 unknown run');
+          var stages = ['collecting', 'correlating', 'deciding', 'recording', 'done'];
+          var stage = stages[Math.min(st.i, stages.length - 1)];
+          st.i++;
+          return resolve({ stage: stage, message: 'stage ' + stage, change_key: st.change_key });
+        }
+        if (p === '/manifest/ledger') return resolve(clone(d.ledger));
+        if (p === '/manifest/check' && m === 'POST') return resolve([{ run_id: 'run-mf-001', change_key: 'mf-resolution-agent-cccccccccccc' }]);
+        if (p === '/sessions') return resolve(clone(d.sessions));
+        if ((p === '/demo/seed' || p === '/demo/reset') && m === 'POST') return resolve({ changes: d.runs.map(function (r) { return r.change_key; }) });
+        if (p === '/healthz') return resolve({ ok: true });
+        throw new Error('mock: no route for ' + m + ' ' + path);
+      } catch (e) { reject(e); }
+    }, 60);
+  });
+}
+
+boot();
+</script>
+</body>
+</html>

@@ -1,0 +1,69 @@
+{
+  "provenance": "simulated",
+  "simulated_because": "Which agents retrieve which article is CONFIGURED here, not discovered. Nothing in Docket reads a retriever index today; this file is demo material and the UI must show it as simulated (RFC section 0, rule 7).",
+  "schema_note": "Not a Docket model. No code under backend/src/docket/ imports this file. It exists so the S4 story can name the three retrievers out loud without anyone believing Docket measured them.",
+  "generated_by": "hand-written for demo/scenarios/s4-knowledge",
+  "articles": {
+    "kb-2211": {
+      "title": "VPN certificate errors",
+      "revision_before": "7",
+      "revision_after": "8",
+      "files": {
+        "7": "demo/knowledge/kb-2211.r7.md",
+        "8": "demo/knowledge/kb-2211.r8.md"
+      },
+      "edited_by": "M. Fernandes (support)",
+      "approved_by": null,
+      "published": "on save, no approver, no window",
+      "what_changed": [
+        "Diagnosis step order reversed: revision 7 reads the certificate first and checks the concentrator last; revision 8 checks the concentrator first and reads the certificate last.",
+        "The section 'Workaround while a certificate is being reissued' was removed entirely, along with the pointer to kb-1180."
+      ],
+      "retrieved_by": [
+        {
+          "agent_id": "resolution-agent",
+          "what_it_does": "Triages and resolves incidents in Freshservice",
+          "why_it_retrieves": "Grounds every VPN incident answer on this article"
+        },
+        {
+          "agent_id": "onboarding-agent",
+          "what_it_does": "Walks new starters through device and network setup",
+          "why_it_retrieves": "Cites this article when first-connect fails"
+        },
+        {
+          "agent_id": "self-service-portal",
+          "what_it_does": "Surfaces articles to employees before a ticket is raised",
+          "why_it_retrieves": "Renders this article verbatim in search results"
+        }
+      ],
+      "contradicts": [
+        {
+          "article_id": "kb-1180",
+          "status": "approved, unchanged, last reviewed 2024-11-18",
+          "why": "kb-1180 still describes the legacy IKEv2 fallback profile that kb-2211 revision 8 removed. Both are retrievable, so two agents asked the same question can now give opposite answers."
+        }
+      ]
+    },
+    "kb-1180": {
+      "title": "Legacy IKEv2 fallback profile - temporary remote access",
+      "revision_before": "3",
+      "revision_after": "3",
+      "files": { "3": "demo/knowledge/kb-1180.md" },
+      "approved_by": "A. Lindqvist (security), R. Okafor (network)",
+      "published": "approved 2024-11-18",
+      "retrieved_by": [
+        {
+          "agent_id": "resolution-agent",
+          "what_it_does": "Triages and resolves incidents in Freshservice",
+          "why_it_retrieves": "Pinned in the manifest so the contradiction is on the record"
+        }
+      ]
+    }
+  },
+  "real_freshservice_path": {
+    "status": "not implemented",
+    "what_exists_today": "demo/agent.manifest.json lists kb-2211 and kb-1180 with a revision string. Editing that revision is what files the change, through the Manifest Watcher (RFC 7.5).",
+    "what_a_real_instance_would_need": "A poller that GETs /api/v2/solutions/articles/{id} on the Freshservice domain in config.json, reads the article's updated_at or revision, and writes it into the manifest's knowledge entry. The Manifest Watcher then behaves identically. Docket's Freshservice client (backend/src/docket/record/freshservice.py) only writes change records today; it does not read solution articles.",
+    "why_it_is_not_faked": "RFC section 0, rule 5: do not guess vendor field names. No solution-article mapping table exists in RFC section 7, so no reader was written."
+  }
+}

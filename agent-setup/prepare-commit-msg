@@ -1,0 +1,13 @@
+#!/bin/bash
+msg_file="$1"
+sid="$DOCKET_SESSION_ID"
+if [ -z "$sid" ]; then
+  f="$(git rev-parse --absolute-git-dir)/docket-session"
+  if [ -f "$f" ]; then
+    read -r fsid fts < "$f"
+    [ $(( $(date +%s) - fts )) -lt 28800 ] && sid="$fsid"
+  fi
+fi
+[ -n "$sid" ] && git interpret-trailers --in-place --if-exists addIfDifferent \
+  --trailer "DocketSession-Id: $sid" "$msg_file"
+exit 0

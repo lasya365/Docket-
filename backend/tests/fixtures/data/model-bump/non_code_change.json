@@ -1,0 +1,96 @@
+{
+  "after": {
+    "agent_id": "resolution-agent",
+    "manifest": {
+      "agent_id": "resolution-agent",
+      "change_ref": null,
+      "knowledge": [
+        {
+          "id": "kb-2211",
+          "revision": "6"
+        }
+      ],
+      "model": "vendor-4.2",
+      "permissions": [
+        "tickets:write"
+      ],
+      "prompt": {
+        "path": "prompts/system.md",
+        "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "tools": [
+        "kb.search",
+        "ticket.update"
+      ],
+      "workflows": [
+        "incident-triage",
+        "entitlement-provisioning",
+        "knowledge-retrieval"
+      ]
+    },
+    "manifest_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "observed_at": "2026-09-16T09:00:00Z",
+    "sequence": 2
+  },
+  "agent_id": "resolution-agent",
+  "before": {
+    "agent_id": "resolution-agent",
+    "manifest": {
+      "agent_id": "resolution-agent",
+      "change_ref": null,
+      "knowledge": [
+        {
+          "id": "kb-2211",
+          "revision": "6"
+        }
+      ],
+      "model": "vendor-4.1",
+      "permissions": [
+        "tickets:write"
+      ],
+      "prompt": {
+        "path": "prompts/system.md",
+        "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "tools": [
+        "kb.search",
+        "ticket.update"
+      ],
+      "workflows": [
+        "incident-triage",
+        "entitlement-provisioning",
+        "knowledge-retrieval"
+      ]
+    },
+    "manifest_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "observed_at": "2026-09-07T09:00:00Z",
+    "sequence": 1
+  },
+  "changed_keys": [
+    "model"
+  ],
+  "detected_at": "2026-09-16T09:00:00Z",
+  "kind": "model_version",
+  "provenance": "real",
+  "rehearsal": {
+    "agent_id": "resolution-agent",
+    "cases": 50,
+    "changed_acceptable": 4,
+    "identical": 44,
+    "manifest_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "provenance": "simulated",
+    "regressed": 2,
+    "regressions": [
+      {
+        "after": "resolve",
+        "before": "escalate",
+        "case_id": "INC-20114"
+      },
+      {
+        "after": "ticket.close",
+        "before": "entitlement.check",
+        "case_id": "INC-20337"
+      }
+    ]
+  }
+}

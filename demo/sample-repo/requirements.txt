@@ -1,0 +1,2 @@
+# The sample governed service has no runtime dependencies on purpose:
+# CI installs pytest and pytest-cov on top of this file.
