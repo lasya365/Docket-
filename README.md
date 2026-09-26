@@ -1,3 +1,6 @@
+## Docket — AI-Native Change Governance
+As SDLC evolves into ADLC, AI agents are driving change at unprecedented scale. Docket extends Freshservice to bring AI-driven changes into governed, intelligent change management.
+
 ## What it is
 
 Docket is an AI-native change governance system for changes created or modified by AI coding agents.
