@@ -1,3 +1,182 @@
+## What it is
+
+Docket is an AI-native change governance system for changes created or modified by AI coding agents.
+
+It extends the traditional Change Advisory Board (CAB) process by collecting evidence from AI-agent activity, source-code changes, pull requests, reviews, CI verification, and agent configuration, and bringing that evidence into a single change record.
+
+Docket is designed to make AI-generated changes traceable, reviewable, and governable while keeping the final approval decision with a human.
+
+## What it does
+
+Docket:
+
+* Collects Claude Code telemetry, including agent sessions, prompts, tool calls, and edits.
+* Correlates AI-agent sessions with the commits and changes they produced.
+* Reads GitHub pull requests, linked issues, declared scope, reviews, review comments, and CI coverage.
+* Attributes changed lines to AI, human, mixed, or unknown authorship where evidence permits.
+* Evaluates four risk signals: **Unattributed Change, Review Depth, Untested Generation, and Blast Radius**.
+* Detects missing evidence and applies penalties rather than treating missing information as approval evidence.
+* Supports governance of no-code AI changes such as model-version and agent-manifest changes.
+* Applies deterministic scoring and produces an **APPROVE** or **HOLD** decision.
+* Records the decision and evidence in Freshservice.
+* Can trigger a Freshservice CAB approval workflow and synchronize the resulting human approval.
+* Publishes the `docket/gate` status to GitHub for merge governance.
+* Optionally uses Anthropic Claude after the decision is sealed to generate an advisory brief for the CAB.
+
+The decision engine itself does **not** use an LLM. Docket's decision is based on collected evidence, configured scoring rules, and hard-stop conditions.
+
+## What it doesn't do
+
+Docket is intentionally scoped as a hackathon prototype. It does not:
+
+* Replace the human CAB or change approver.
+* Use an LLM to make the APPROVE/HOLD decision.
+* Treat missing telemetry or missing evidence as positive evidence.
+* Support every AI coding agent; the current agent integration is Claude Code.
+* Provide multi-tenant accounts, enterprise roles, or identity management.
+* Provide production-grade database backup, migrations, rate limiting, or monitoring.
+* Provide TLS directly.
+* Guarantee perfect AI/human line attribution when telemetry is unavailable or code is substantially rewritten.
+* Measure actual human reading time; the review-depth signal is an evidence-based estimate.
+* Automatically replace the human approval process.
+
+The current implementation deliberately focuses on Claude Code, GitHub, and Freshservice integrations.
+
+## Product Integrations
+
+| Product                       | Used for                                                                                                                                                                                             |
+| ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Freshworks — Freshservice** | Filing the Docket change record with the decision, score, evidence seal, and source URL; triggering CAB approval through Workflow Automator; and pulling the human approval result back into Docket. |
+| **Anthropic — Claude Code**   | Primary AI-agent evidence source. Docket collects Claude Code telemetry and hooks covering sessions, prompts, tool calls, and edits.                                                                 |
+| **Anthropic — Claude**        | Optional post-decision advisory brief and CAB questions. The brief is generated only after the decision is sealed and is explicitly advisory, not part of the decision.                              |
+| **GitHub**                    | Reading pull requests, linked issues, declared scope, commits, reviews, review comments, and CI coverage artifacts; and publishing the `docket/gate` commit status.                                  |
+
+### Integration details
+
+**Freshservice**
+
+Docket writes the decision, score, seal, and source URL into Freshservice custom fields. A Freshservice Workflow Automator rule can request CAB approval when the Docket decision requires it. Docket can then synchronize the resulting approval state.
+
+**Anthropic**
+
+Claude Code is used as the governed coding agent and provides the primary telemetry source. Separately, Anthropic Claude can optionally generate a short advisory brief after the decision has been sealed. The brief does not affect the decision.
+**GitHub**
+
+Docket reads the PR, linked issue, declared scope, reviews, review comments, commits, and CI coverage. It can also publish the `docket/gate` commit status, with `pending` for HOLD and `success` for APPROVE.
+
+> **Note:** Sarvam, Vobiz, and Databricks are not listed as implemented integrations because the current README does not document an actual Docket integration with those products. They should only be added here if they are genuinely used in the submitted implementation.
+
+## System Interaction Diagram
+
+```text
+                         ┌──────────────────────┐
+                         │      AI Change       │
+                         │  Code / Model /      │
+                         │  Agent Configuration │
+                         └──────────┬───────────┘
+                                    │
+                                    ▼
+                    ┌────────────────────────────┐
+                    │          DOCKET            │
+                    │                            │
+                    │  1. Collect Evidence       │
+                    │  2. Correlate Evidence     │
+                    │  3. Deterministic Decision │
+                    │  4. Record & Seal          │
+                    └─────────────┬──────────────┘
+                                  │
+             ┌────────────────────┼────────────────────┐
+             │                    │                    │
+             ▼                    ▼                    ▼
+      ┌─────────────┐      ┌─────────────┐     ┌──────────────┐
+      │  Anthropic  │      │   GitHub    │     │ Agent        │
+      │ Claude Code │      │             │     │ Manifest     │
+      │             │      │ PR / Issue  │     │              │
+      │ Telemetry   │      │ Reviews     │     │ Model /      │
+      │ Prompts     │      │ CI Coverage │     │ Tools /      │
+      │ Tool Calls  │      │ Commits     │     │ Permissions  │
+      │ Edits       │      │ Scope       │     │              │
+      └──────┬──────┘      └──────┬──────┘     └──────┬───────┘
+             │                    │                    │
+             └────────────────────┼────────────────────┘
+                                  ▼
+                       ┌─────────────────────┐
+                       │   ChangeRecord      │
+                       │                     │
+                       │ Evidence + Signals  │
+                       └──────────┬──────────┘
+                                  │
+                                  ▼
+                       ┌─────────────────────┐
+                       │ Deterministic Gate  │
+                       │                     │
+                       │ APPROVE / HOLD      │
+                       └──────────┬──────────┘
+                                  │
+                     ┌────────────┴────────────┐
+                     │                         │
+                     ▼                         ▼
+             ┌──────────────┐          ┌──────────────┐
+             │    GitHub    │          │ Freshservice │
+             │              │          │              │
+             │ docket/gate  │          │ Change       │
+             │ commit status│          │ Record       │
+             └──────────────┘          └──────┬───────┘
+                                               │
+                                               ▼
+                                        ┌──────────────┐
+                                        │ Human / CAB  │
+                                        │   Approval   │
+                                        └──────┬───────┘
+                                               │
+                                               ▼
+                                        Approval Sync
+                                               │
+                                               ▼
+                                            Docket
+
+                    ┌─────────────────────────────┐
+                    │ Anthropic Claude             │
+                    │ Optional advisory brief     │
+                    │ AFTER decision is sealed    │
+                    └─────────────────────────────┘
+```
+
+### Decision flow
+
+```text
+Claude Code + GitHub + Agent Manifest
+                 │
+                 ▼
+          Collect Evidence
+                 │
+                 ▼
+        Correlate Evidence
+                 │
+                 ▼
+       Four Risk Signals
+                 │
+                 ▼
+          Gate + Hard Stops
+                 │
+          ┌──────┴──────┐
+          ▼             ▼
+       APPROVE         HOLD
+          │             │
+          └──────┬──────┘
+                 ▼
+          Record + Seal
+                 │
+          ┌──────┴─────────┐
+          ▼                ▼
+       GitHub          Freshservice
+      gate status       Change Record
+                            │
+                            ▼
+                       Human / CAB
+                         Approval
+```
+
 # Docket v3
 
 **Change governance for code written by AI agents.**
